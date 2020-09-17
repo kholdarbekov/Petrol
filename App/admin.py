@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
 from .models import Car, Petrol, Trade, Oil, OilTrade, OilCheckIn
 from .forms import OilForm
 
@@ -8,6 +9,7 @@ class MyAdminSite(admin.AdminSite):
 
 
 admin.site = MyAdminSite()
+admin.site.register(User)
 
 
 class CarAdmin(admin.ModelAdmin):
