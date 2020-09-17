@@ -21,6 +21,9 @@ from django.urls import path
 
 admin.autodiscover()
 
+handler404 = 'App.views.page_not_found_view'
+handler500 = 'App.views.internal_server_error_view'
+
 urlpatterns = [
     path(r'', include('App.urls')),
     path('admin/', admin.site.urls),

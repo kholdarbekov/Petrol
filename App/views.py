@@ -246,3 +246,15 @@ class OilTradeDeleteView(DeleteView):
         success_url = self.get_success_url()
         self.object.delete()
         return HttpResponse(success_url)
+
+
+def page_not_found_view(request, exception):
+    response = render(request, '404.html')
+    response.status_code = 404
+    return response
+
+
+def internal_server_error_view(request):
+    response = render(request, '500.html')
+    response.status_code = 500
+    return response
