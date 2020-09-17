@@ -4,12 +4,9 @@ from .models import Car, Petrol, Trade, Oil, OilTrade, OilCheckIn
 from .forms import OilForm
 
 
-class MyAdminSite(admin.AdminSite):
-    login_template = 'login.html'
-
-
-admin.site = MyAdminSite()
-admin.site.register(User)
+admin.site.login_template = 'login.html'
+admin.site.site_header = 'Petrol'
+admin.site.site_title = 'Petrol'
 
 
 class CarAdmin(admin.ModelAdmin):
