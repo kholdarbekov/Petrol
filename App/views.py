@@ -1,7 +1,7 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
-from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy, reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
@@ -219,7 +219,10 @@ class OilTradeCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # form.instance.created_by = self.request.user
+        trade = form.instance
+        if trade.oil.RemainingLitres < trade.litreSold:
+            return redirect(self.success_url, form=form)
+
         return super().form_valid(form)
 
     def form_invalid(self, form):

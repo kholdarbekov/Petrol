@@ -87,6 +87,9 @@ class OilTrade(models.Model):
             self.tradePrice = self.oil.price * self.litreSold
 
             openedOilLitre = self.oil.RemainingLitres % self.oil.bottleVolume
+            if self.oil.RemainingLitres < self.litreSold:
+                return
+
             self.oil.RemainingLitres -= self.litreSold
 
             if openedOilLitre < self.litreSold:  # new bottle is opened
