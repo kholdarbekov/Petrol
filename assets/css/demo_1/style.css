@@ -23319,7 +23319,9 @@ address p {
 .dashboard-date {
   width: 211px; }
   .dashboard-date.datepicker.input-group {
-    border: 1px solid #727cf5; }
+    border: 1px solid #727cf5;
+    border-radius: 4px;
+    direction:ltr; }
     .dashboard-date.datepicker.input-group input {
       height: 32px;
       background: transparent;
@@ -24636,7 +24638,9 @@ select {
 
 .datepicker.input-group {
   padding: 0;
-  border: 1px solid #e8ebf1; }
+  border: 1px solid #e8ebf1;
+  border-radius: 4px;
+  direction:ltr; }
   .datepicker.input-group .form-control, .datepicker.input-group select, .datepicker.input-group .email-compose-fields .select2-container--default .select2-selection--multiple, .email-compose-fields .select2-container--default .datepicker.input-group .select2-selection--multiple, .datepicker.input-group .select2-container--default .select2-selection--single, .select2-container--default .datepicker.input-group .select2-selection--single, .datepicker.input-group .select2-container--default .select2-selection--single .select2-search__field, .select2-container--default .select2-selection--single .datepicker.input-group .select2-search__field, .datepicker.input-group .typeahead,
   .datepicker.input-group .tt-query,
   .datepicker.input-group .tt-hint {
