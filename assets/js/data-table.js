@@ -27,6 +27,7 @@ $(function() {
         search: ""
       },
       "fnDrawCallback": function( oSettings ) {
+        $("a:regex(id,^Delete)").unbind('click');
         $("a:regex(id,^Delete)").on("click",function(e) {
           e.preventDefault(); // cancel the link itself
           var result = confirm("Are you sure to delete?");
