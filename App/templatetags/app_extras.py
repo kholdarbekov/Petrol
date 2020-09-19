@@ -83,3 +83,11 @@ def get_item(dictionary, key):
             return val.data
     else:
         return ''
+
+
+@register.filter
+def get_dict_value_by_key(dictionary, key):
+    if dictionary:
+        return dictionary[key]
+    else:
+        return ''

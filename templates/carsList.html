@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static app_extras %}
+
+{% block title %}Cars{% endblock %}
+
+{% block css_block %}
+    <!-- plugin css for this page -->
+    <link rel="stylesheet" href="{% static "vendors/datatables.net-bs4/dataTables.bootstrap4.css" %}">
+    <!-- end plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="{% static "fonts/feather-font/css/iconfont.css" %}">
+    <link rel="stylesheet" href="{% static "vendors/flag-icon-css/css/flag-icon.min.css" %}">
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="{% static "css/demo_1/style.css" %}">
+    <!-- End layout styles -->
+{% endblock %}
+
+{% block body_content %}
+    <div class="page-content">
+
+        <nav class="page-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Petrol</a></li>
+                <li class="breadcrumb-item active" aria-current="page">List Of Cars</li>
+            </ol>
+        </nav>
+        {% if request.user.is_authenticated %}
+            <div class="row">
+                <div class="col-md-12 grid-margin">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Add New Car</h6>
+                            <form action="{% url 'car_add' %}" method="post" id="signupForm">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Car Number</label>
+                                            <input class="form-control" data-inputmask-alias="**-******" data-inputmask="'casing':'upper', 'autoUnmask': true, 'removeMaskOnSubmit': true" name="carNumber"
+                                                   type="text" placeholder="Car Numer">
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Model</label>
+                                            <div id="the-basics">
+                                                <input value="{{ form|get_item:'model' }}" name="model" required="required" class="typeahead" type="text" placeholder="Model Name">
+                                            </div>
+                                        </div>
+                                    </div><!-- Col -->
+                                </div><!-- Row -->
+                                <button type="submit" class="btn btn-primary submit">Submit form</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">List Of Cars</h6>
+                        <div class="table-responsive">
+                            <table id="dataTableExample" class="table">
+                                <thead>
+                                <tr>
+                                    <th>Car Number</th>
+                                    <th>Model</th>
+                                    <th>Bought Litres</th>
+                                    <th>Total Trade Price</th>
+                                    <th>Last Check In</th>
+                                    <th>Price</th>
+                                    {% if request.user.is_authenticated %}<th>Edit / Delete</th>{% endif %}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for car in cars %}
+                                    <tr>
+                                        <td>{{ car.carNumber }}</td>
+                                        <td>{{ car.model }}</td>
+                                        <td>{{ car.get_trades|get_dict_value_by_key:'litre'|floatformat:1 }} L</td>
+                                        <td>{{ car.get_trades|get_dict_value_by_key:'total_price'|floatformat:2 }} UZS</td>
+                                        <td></td>
+                                        <td></td>
+                                        {% if request.user.is_authenticated %}
+                                            <td><a href="#" class="editor_edit">Edit</a> / <a href="{% url 'car_delete' %}"
+                                                                                              title="{{ car.carNumber }}"
+                                                                                              id="Delete{{ forloop.counter }}"
+                                                                                              class="editor_remove">Delete</a>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts_block %}
+    <!-- core:js -->
+    <script src="{% static "vendors/core/core.js" %}"></script>
+    <!-- endinject -->
+    <!-- plugin js for this page -->
+    <script src="{% static "vendors/typeahead.js/typeahead.bundle.min.js" %}"></script>
+    <script src="{% static "vendors/inputmask/jquery.inputmask.min.js" %}"></script>
+    <!-- end plugin js for this page -->
+    <!-- inject:js -->
+    <script src="{% static "vendors/feather-icons/feather.min.js" %}"></script>
+    <script src="{% static "js/template.js" %}"></script>
+    <!-- endinject -->
+    <!-- custom js for this page -->
+    <script src="{% static "js/typeahead.js" %}"></script>
+    <script src="{% static "js/bootstrap-maxlength.js" %}"></script>
+    <script src="{% static "js/inputmask.js" %}"></script>
+
+    <script src="{% static "vendors/datatables.net/jquery.dataTables.js" %}"></script>
+    <script src="{% static "vendors/datatables.net-bs4/dataTables.bootstrap4.js" %}"></script>
+    <script src="{% static "vendors/js-coockie/js.cookie.min.js" %}"></script>
+    <script src="{% static "js/data-table.js" %}"></script>
+    <script>
+      var substringMatcher = function(strs) {
+        return function findMatches(q, cb) {
+          var matches, substringRegex;
+
+          // an array that will be populated with substring matches
+          matches = [];
+
+          // regex used to determine if a string contains the substring `q`
+          var substrRegex = new RegExp(q, 'i');
+
+          // iterate through the pool of strings and for any string that
+          // contains the substring `q`, add it to the `matches` array
+          for (var i = 0; i < strs.length; i++) {
+            if (substrRegex.test(strs[i])) {
+              matches.push(strs[i]);
+            }
+          }
+
+          cb(matches);
+        };
+      };
+      var models = [
+          {% for model in carModels %}
+              "{{ model }}"
+              {% if not forloop.last %},{% endif %}
+          {% endfor %}
+      ];
+
+      $('#the-basics .typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 1
+      }, {
+        name: 'models',
+        source: substringMatcher(models)
+      });
+    </script>
+    <!-- end custom js for this page -->
+{% endblock %}
+

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from .models import Car, Petrol, Trade, Oil, OilTrade, OilCheckIn
+from .models import CarModel, Car, Petrol, Trade, Oil, OilTrade, OilCheckIn
 from .forms import OilForm
 
 
@@ -9,13 +9,17 @@ admin.site.site_header = 'Petrol'
 admin.site.site_title = 'Petrol'
 
 
+class CarModelAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description', 'created']
+
+
 class CarAdmin(admin.ModelAdmin):
     def get_trades(self, obj):
         trades = obj.get_trades()
         return '{total_litre} litr, {total_price} so\'m'.format(total_litre=trades['litre'], total_price=trades['total_price'])
     get_trades.short_description = 'Refuelling'
 
-    list_display = ['carNumber', 'model', 'get_trades']
+    list_display = ['carNumber', 'model', 'get_trades', 'created', 'last_updated']
 
 
 class PetrolAdmin(admin.ModelAdmin):
@@ -23,7 +27,7 @@ class PetrolAdmin(admin.ModelAdmin):
 
 
 class TradeAdmin(admin.ModelAdmin):
-    list_display = ['car', 'petrol', 'litre', 'price']
+    list_display = ['car', 'petrol', 'litre', 'price', 'tradeDateTime']
 
 
 class OilAdmin(admin.ModelAdmin):
@@ -62,6 +66,7 @@ class OilCheckInAdmin(admin.ModelAdmin):
         super(OilCheckInAdmin, self).delete_queryset(request, queryset)
 
 
+admin.site.register(CarModel, CarModelAdmin)
 admin.site.register(Car, CarAdmin)
 admin.site.register(Petrol, PetrolAdmin)
 admin.site.register(Trade, TradeAdmin)

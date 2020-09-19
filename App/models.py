@@ -2,9 +2,21 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import models
 
 
+class CarModel(models.Model):
+    name = models.CharField(primary_key=True, max_length=31)
+    description = models.TextField(blank=True, null=True)
+    created = models.DateField(auto_now_add=True)
+    last_updated = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Car(models.Model):
     carNumber = models.CharField(primary_key=True, max_length=8)
-    model = models.CharField(max_length=50)
+    model = models.ForeignKey(CarModel, related_name='cars', on_delete=models.CASCADE)
+    created = models.DateField(auto_now_add=True)
+    last_updated = models.DateField(auto_now=True)
 
     def get_trades(self):
         trades = {'litre': 0, 'total_price': 0}
@@ -36,7 +48,7 @@ class Trade(models.Model):  # for Petrol
     car = models.ForeignKey(Car, related_name='trades', on_delete=models.CASCADE)
     petrol = models.ForeignKey(Petrol, related_name='trades', on_delete=models.CASCADE)
     litre = models.PositiveSmallIntegerField()
-    tradeDateTime = models.DateTimeField(auto_now_add=True)
+    tradeDateTime = models.DateTimeField(blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, blank=True)
 
     def __str__(self):

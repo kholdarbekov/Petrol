@@ -8,8 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, TemplateView, ListView
 from django.views.generic.edit import CreateView, DeleteView
 
-from .models import OilTrade, OilCheckIn, Oil
-from .forms import OilTradeForm
+from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol
+from .forms import OilTradeForm, TradeForm
 
 
 class IndexView(TemplateView):
@@ -88,40 +88,6 @@ class OilsListView(ListView):
         return super().dispatch(*args, **kwargs)
 
 
-class OilCheckInsListView(ListView):
-    model = OilCheckIn
-    context_object_name = 'oilCheckIns'
-    template_name = 'oilCheckIns.html'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the oils
-        context['oils'] = Oil.objects.all()
-        return context
-
-
-class OilTradesListView(ListView):
-    model = OilTrade
-    context_object_name = 'oilTrades'
-    template_name = 'oilsTrades.html'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the oils
-        context['oils'] = Oil.objects.all()
-        return context
-
-
 class OilCreateView(CreateView):
     model = Oil
     fields = ['name', 'price', 'RemainingLitres', 'RemainingBottles', 'bottleVolume', 'color']
@@ -161,6 +127,23 @@ class OilDeleteView(DeleteView):
         success_url = self.get_success_url()
         self.object.delete()
         return HttpResponse(success_url)
+
+
+class OilCheckInsListView(ListView):
+    model = OilCheckIn
+    context_object_name = 'oilCheckIns'
+    template_name = 'oilCheckIns.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the oils
+        context['oils'] = Oil.objects.all()
+        return context
 
 
 class OilCheckinCreateView(CreateView):
@@ -205,6 +188,23 @@ class OilCheckinDeleteView(DeleteView):
         return HttpResponse(success_url)
 
 
+class OilTradesListView(ListView):
+    model = OilTrade
+    context_object_name = 'oilTrades'
+    template_name = 'oilsTrades.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the oils
+        context['oils'] = Oil.objects.all()
+        return context
+
+
 class OilTradeCreateView(CreateView):
     model = OilTrade
     # fields = ['oil', 'litreSold', 'dateTime']
@@ -243,6 +243,123 @@ class OilTradeDeleteView(DeleteView):
 
     def get_object(self, queryset=None):
         return get_object_or_404(OilTrade, pk=self.request.POST['pk'])
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponse(success_url)
+
+
+class CarsListView(ListView):
+    model = Car
+    context_object_name = 'cars'
+    template_name = 'carsList.html'
+
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the oils
+        context['carModels'] = CarModel.objects.all()
+        return context
+
+
+class CarCreateView(CreateView):
+    model = Car
+    fields = ['carNumber', 'model']
+    success_url = reverse_lazy('cars_list')
+    template_name = 'carsList.html'
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        # form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+
+
+class CarDeleteView(DeleteView):
+    model = Car
+    success_url = reverse_lazy('cars_list')
+
+    http_method_names = ['post', ]
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Car, carNumber=self.request.POST['pk'])
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponse(success_url)
+
+
+class TradesListView(ListView):
+    model = Trade
+    context_object_name = 'trades'
+    template_name = 'petrolTrades.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the oils
+        context['petrol_list'] = Petrol.objects.all()
+        context['cars'] = Car.objects.all()
+        return context
+
+
+class TradeCreateView(CreateView):
+    model = Trade
+    success_url = reverse_lazy('trades_list')
+    template_name = 'petrolTrades.html'
+    form_class = TradeForm
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+
+
+class TradeDeleteView(DeleteView):
+    model = Trade
+    success_url = reverse_lazy('trades_list')
+
+    http_method_names = ['post', ]
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Trade, pk=self.request.POST['pk'])
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()

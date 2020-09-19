@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static app_extras %}
 
-{% block title %}Oils Trades{% endblock %}
+{% block title %}Petrol Trades{% endblock %}
 
 {% block css_block %}
     <!-- plugin css for this page -->
@@ -23,8 +23,8 @@
 
         <nav class="page-breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Oil Change</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Oil Trades</li>
+                <li class="breadcrumb-item"><a href="#">Petrol</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Petrol Trades</li>
             </ol>
         </nav>
 
@@ -32,23 +32,31 @@
             <div class="col-md-12 grid-margin">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Add New Oil Trade</h6>
-                        <form action="{% url 'oil_trades_add' %}" method="post">
+                        <h6 class="card-title">Add New Petrol Trade</h6>
+                        <form action="{% url 'trade_add' %}" method="post">
                             {% csrf_token %}
                             {{ form.non_field_errors }}
                             <div class="row">
-                                <div class="col-sm-7">
+                                <div class="col-sm-5">
                                     <div class="form-group">
-                                        <label>Oil</label>
-                                        <div id="the-basics">
-                                            <input value="{{ form|get_item:'oil' }}" name="oil" required="required" class="typeahead" type="text" placeholder="Oil Name">
+                                        <label>Car</label>
+                                        <div id="the-cars">
+                                            <input value="{{ form|get_item:'car' }}" name="car" required="required" class="typeahead" type="text" placeholder="Car Number">
                                         </div>
                                     </div>
                                 </div><!-- Col -->
                                 <div class="col-sm-5">
                                     <div class="form-group">
+                                        <label>Petrol</label>
+                                        <div id="the-petrols">
+                                            <input value="{{ form|get_item:'petrol' }}" name="petrol" required="required" class="typeahead" type="text" placeholder="Car Number">
+                                        </div>
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-2">
+                                    <div class="form-group">
                                         <label class="control-label">Litres Sold</label>
-                                        <input name="litreSold" required="required" type="number" class="form-control" placeholder="Enter in Integers">
+                                        <input name="litre" required="required" type="number" class="form-control" placeholder="Enter in Integers">
                                     </div>
                                 </div><!-- Col -->
                             </div><!-- Row -->
@@ -57,7 +65,7 @@
                                     <div class="form-group">
                                         <label class="control-label">Date</label>
                                         <div class="input-group date datepicker" id="datePickerExample">
-                                            <input name="dateTime_0" type="text" class="form-control"><span class="input-group-addon"><i data-feather="calendar"></i></span>
+                                            <input name="tradeDateTime_0" type="text" class="form-control"><span class="input-group-addon"><i data-feather="calendar"></i></span>
                                         </div>
                                     </div>
                                 </div>
@@ -65,7 +73,7 @@
                                     <div class="form-group">
                                         <label class="control-label">Time</label>
                                         <div class="input-group date timepicker" id="datetimepickerExample" data-target-input="nearest">
-                                            <input name="dateTime_1" type="text" required="required" class="form-control datetimepicker-input" data-target="#datetimepickerExample"/>
+                                            <input name="tradeDateTime_1" type="text" required="required" class="form-control datetimepicker-input" data-target="#datetimepickerExample"/>
                                             <div class="input-group-append" data-target="#datetimepickerExample" data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i data-feather="clock"></i></div>
                                             </div>
@@ -84,26 +92,30 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Oil Trades</h6>
+                        <h6 class="card-title">Petrol Trades</h6>
                         <div class="table-responsive">
                             <table id="dataTableExample" class="table">
                                 <thead>
                                 <tr>
-                                    <th>Oil</th>
+                                    <th>Car</th>
+                                    <th>Model</th>
                                     <th>Litre Sold</th>
                                     <th>Trade Price</th>
-                                    <th>Time</th>
+                                    <th>Petrol</th>
+                                    <th>Date Time</th>
                                     <th>Edit / Delete</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for trade in oilTrades %}
+                                {% for trade in trades %}
                                     <tr>
-                                        <td>{{ trade.oil }}</td>
-                                        <td>{{ trade.litreSold|floatformat:1 }} L</td>
-                                        <td>{{ trade.tradePrice|floatformat:2 }} UZS</td>
-                                        <td>{{ trade.dateTime|date:"Y.m.d H:i" }}</td>
-                                        <td><a href="#" class="editor_edit">Edit</a> / <a href="{% url 'oil_trades_delete' %}"
+                                        <td>{{ trade.car.carNumber }}</td>
+                                        <td>{{ trade.car.model }}</td>
+                                        <td>{{ trade.litre|floatformat:1 }} L</td>
+                                        <td>{{ trade.price|floatformat:2 }} UZS</td>
+                                        <td>{{ trade.petrol }}</td>
+                                        <td>{{ trade.tradeDateTime|date:"Y.m.d H:i" }}</td>
+                                        <td><a href="#" class="editor_edit">Edit</a> / <a href="{% url 'trade_delete' %}"
                                                                                           title="{{ trade.pk }}"
                                                                                           id="Delete{{ forloop.counter }}"
                                                                                           class="editor_remove">Delete</a>
@@ -166,20 +178,36 @@
           cb(matches);
         };
       };
-      var states = [
-          {% for oil in oils %}
-              "{{ oil.name }}"
+      var petrol_list = [
+          {% for petrol in petrol_list %}
+              "{{ petrol }}"
               {% if not forloop.last %},{% endif %}
           {% endfor %}
       ];
 
-      $('#the-basics .typeahead').typeahead({
+      var cars = [
+          {% for car in cars %}
+              "{{ car }}"
+              {% if not forloop.last %},{% endif %}
+          {% endfor %}
+      ];
+
+      $('#the-cars .typeahead').typeahead({
         hint: true,
         highlight: true,
         minLength: 1
       }, {
-        name: 'states',
-        source: substringMatcher(states)
+        name: 'cars',
+        source: substringMatcher(cars)
+      });
+
+      $('#the-petrols .typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 1
+      }, {
+        name: 'petrol_list',
+        source: substringMatcher(petrol_list)
       });
     </script>
     <!-- end custom js for this page -->
