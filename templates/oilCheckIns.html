@@ -30,30 +30,30 @@
 					<div class="col-md-12 grid-margin">
 						<div class="card">
 							<div class="card-body">
-								<h6 class="card-title">Add New Oil Check In</h6>
+								<h6 class="card-title">Yog' Kelishini Kirgizish</h6>
 									<form action="{% url 'oil_checkin_add' %}" method="post">
                                         {% csrf_token %}
                                         {{ form.non_field_errors }}
 										<div class="row">
                                             <div class="col-sm-8">
                                                 <div class="form-group">
-                                                    <label>Oil</label>
+                                                    <label>Yog'</label>
                                                     <div id="the-basics">
-                                                        <input value="{{ form|get_item:'oil' }}" name="oil" class="typeahead" type="text" placeholder="Oil Name">
+                                                        <input value="{{ form|get_item:'oil' }}" name="oil" class="typeahead" type="text" placeholder="Yog' Nomi">
                                                     </div>
                                                 </div>
                                             </div><!-- Col -->
                                             <div class="col-sm-4">
 												<div class="form-group">
-													<label class="control-label">Bottles</label>
-													<input value="{{ form|get_item:'bottles' }}" name="bottles" required="required" type="number" class="form-control" placeholder="Enter in Integers">
+													<label class="control-label">Idish soni</label>
+													<input value="{{ form|get_item:'bottles' }}" name="bottles" required="required" type="number" class="form-control" placeholder="Idish sonini kirgizing">
 												</div>
 											</div><!-- Col -->
 										</div><!-- Row -->
 										<div class="row">
 											<div class="col-sm-12">
                                                 <div class="form-group">
-                                                    <label class="control-label">Date</label>
+                                                    <label class="control-label">Kelgan Kun</label>
                                                     <div class="input-group date datepicker" id="datePickerExample">
                                                         <input name="date" type="text" class="form-control"><span class="input-group-addon"><i data-feather="calendar"></i></span>
                                                     </div>
@@ -71,16 +71,16 @@
 					<div class="col-md-12 grid-margin stretch-card">
                         <div class="card">
                           <div class="card-body">
-                            <h6 class="card-title">Oil Check Ins</h6>
+                            <h6 class="card-title">Yog' Kelganlari Ro'yxati</h6>
                             <div class="table-responsive">
                               <table id="dataTableExample" class="table">
                                 <thead>
                                   <tr>
-                                    <th>Name</th>
-                                    <th>Bottles</th>
-                                    <th>Bottle Volume</th>
-                                    <th>Time</th>
-                                    <th>Cost</th>
+                                    <th>Yog' Nomi</th>
+                                    <th>Idish soni</th>
+                                    <th>Idish hajmi</th>
+                                    <th>Vaqti</th>
+                                    <th>Summasi</th>
                                     <th>Edit / Delete</th>
                                   </tr>
                                 </thead>

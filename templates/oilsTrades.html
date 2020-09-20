@@ -32,22 +32,22 @@
             <div class="col-md-12 grid-margin">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Add New Oil Trade</h6>
+                        <h6 class="card-title">Yog' Savdosini Qo'shish</h6>
                         <form action="{% url 'oil_trades_add' %}" method="post">
                             {% csrf_token %}
                             {{ form.non_field_errors }}
                             <div class="row">
                                 <div class="col-sm-7">
                                     <div class="form-group">
-                                        <label>Oil</label>
+                                        <label>Yog'</label>
                                         <div id="the-basics">
-                                            <input value="{{ form|get_item:'oil' }}" name="oil" required="required" class="typeahead" type="text" placeholder="Oil Name">
+                                            <input value="{{ form|get_item:'oil' }}" name="oil" required="required" class="typeahead" type="text" placeholder="Yog' Nomi">
                                         </div>
                                     </div>
                                 </div><!-- Col -->
                                 <div class="col-sm-5">
                                     <div class="form-group">
-                                        <label class="control-label">Litres Sold</label>
+                                        <label class="control-label">Litr Sotildi</label>
                                         <input name="litreSold" required="required" type="number" class="form-control" placeholder="Enter in Integers">
                                     </div>
                                 </div><!-- Col -->
@@ -55,7 +55,7 @@
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label class="control-label">Date</label>
+                                        <label class="control-label">Kun</label>
                                         <div class="input-group date datepicker" id="datePickerExample">
                                             <input name="dateTime_0" type="text" class="form-control"><span class="input-group-addon"><i data-feather="calendar"></i></span>
                                         </div>
@@ -63,7 +63,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label class="control-label">Time</label>
+                                        <label class="control-label">Soat</label>
                                         <div class="input-group date timepicker" id="datetimepickerExample" data-target-input="nearest">
                                             <input name="dateTime_1" type="text" required="required" class="form-control datetimepicker-input" data-target="#datetimepickerExample"/>
                                             <div class="input-group-append" data-target="#datetimepickerExample" data-toggle="datetimepicker">
@@ -84,15 +84,15 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Oil Trades</h6>
+                        <h6 class="card-title">Yog' Savdolari Ro'yxati</h6>
                         <div class="table-responsive">
                             <table id="dataTableExample" class="table">
                                 <thead>
                                 <tr>
-                                    <th>Oil</th>
-                                    <th>Litre Sold</th>
-                                    <th>Trade Price</th>
-                                    <th>Time</th>
+                                    <th>Yog' Nomi</th>
+                                    <th>Sotilgan Litr</th>
+                                    <th>Savdo Summasi</th>
+                                    <th>Vaqti</th>
                                     <th>Edit / Delete</th>
                                 </tr>
                                 </thead>

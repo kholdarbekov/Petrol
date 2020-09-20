@@ -57,9 +57,9 @@ def remaining_percent(sold, remainingLitres):
 def multiply(value, arg):
     try:
         if value:
-            return int(value) * int(arg)
+            return int(value) * float(arg)
         else:
-            return None
+            return 0
     except ValueError:
         return None
 

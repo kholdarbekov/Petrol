@@ -30,14 +30,14 @@
                 <div class="col-md-12 grid-margin">
                     <div class="card">
                         <div class="card-body">
-                            <h6 class="card-title">Add New Car</h6>
+                            <h6 class="card-title">Yangi Mashina Qo'shish</h6>
                             <form action="{% url 'car_add' %}" method="post" id="signupForm">
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label class="control-label">Car Number</label>
-                                            <input class="form-control" data-inputmask-alias="**-******" data-inputmask="'casing':'upper', 'autoUnmask': true, 'removeMaskOnSubmit': true" name="carNumber"
+                                            <label class="control-label">Mashina Raqami</label>
+                                            <input class="form-control" data-inputmask-alias="99-*99*aa" data-inputmask="'casing':'upper', 'autoUnmask': true, 'removeMaskOnSubmit': true" name="carNumber"
                                                    type="text" placeholder="Car Numer">
                                         </div>
                                     </div><!-- Col -->
@@ -62,17 +62,16 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">List Of Cars</h6>
+                        <h6 class="card-title">Mashinalar Ro'yxati</h6>
                         <div class="table-responsive">
                             <table id="dataTableExample" class="table">
                                 <thead>
                                 <tr>
-                                    <th>Car Number</th>
+                                    <th>Mashina Raqami</th>
                                     <th>Model</th>
-                                    <th>Bought Litres</th>
-                                    <th>Total Trade Price</th>
-                                    <th>Last Check In</th>
-                                    <th>Price</th>
+                                    <th>Umumiy Sotib Olgan Litri</th>
+                                    <th>Umumiy Sotib Olgan Narxi</th>
+                                    <th>Bonus</th>
                                     {% if request.user.is_authenticated %}<th>Edit / Delete</th>{% endif %}
                                 </tr>
                                 </thead>
@@ -83,10 +82,9 @@
                                         <td>{{ car.model }}</td>
                                         <td>{{ car.get_trades|get_dict_value_by_key:'litre'|floatformat:1 }} L</td>
                                         <td>{{ car.get_trades|get_dict_value_by_key:'total_price'|floatformat:2 }} UZS</td>
-                                        <td></td>
-                                        <td></td>
+                                        <td>{{ car.get_trades|get_dict_value_by_key:'total_price'|multiply:0.02 }} UZS</td>
                                         {% if request.user.is_authenticated %}
-                                            <td><a href="#" class="editor_edit">Edit</a> / <a href="{% url 'car_delete' %}"
+                                            <td><a href="#" class="editor_edit">Bonus</a> / <a href="{% url 'car_delete' %}"
                                                                                               title="{{ car.carNumber }}"
                                                                                               id="Delete{{ forloop.counter }}"
                                                                                               class="editor_remove">Delete</a>

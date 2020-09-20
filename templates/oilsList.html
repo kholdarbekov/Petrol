@@ -31,34 +31,34 @@
             <div class="col-md-12 grid-margin">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Add New Oil Type</h6>
+                        <h6 class="card-title">Yangi Yog' Turi Qo'shish</h6>
                         <form action="{% url 'oil_add' %}" method="post" id="signupForm">
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col-sm-4">
                                     <div class="form-group">
-                                        <label class="control-label">Oil Name</label>
+                                        <label class="control-label">Yog' Nomi</label>
                                         <input class="form-control" maxlength="63" name="name" id="defaultconfig-2"
                                                type="text" placeholder="Type Something..">
                                     </div>
                                 </div><!-- Col -->
                                 <div class="col-sm-2">
                                     <div class="form-group">
-                                        <label class="control-label">Price</label>
+                                        <label class="control-label">1L uchun narx</label>
                                         <input name="price" class="form-control mb-4 mb-md-0"
                                                data-inputmask="'alias': 'currency', 'autoUnmask': true, 'removeMaskOnSubmit': true"/>
                                     </div>
                                 </div><!-- Col -->
                                 <div class="col-sm-3">
                                     <div class="form-group">
-                                        <label class="control-label">Remaining Litres</label>
+                                        <label class="control-label">Qolgan Yog' litrda</label>
                                         <input name="RemainingLitres" type="text" class="form-control"
                                                placeholder="Enter in Litres">
                                     </div>
                                 </div><!-- Col -->
                                 <div class="col-sm-3">
                                     <div class="form-group">
-                                        <label class="control-label">Remaining Bottles</label>
+                                        <label class="control-label">Qolgan idish soni</label>
                                         <input name="RemainingBottles" type="text" class="form-control"
                                                placeholder="Enter in Integers">
                                     </div>
@@ -67,7 +67,7 @@
                             <div class="row">
                                 <div class="col-sm-4">
                                     <div class="form-group">
-                                        <label class="control-label">Bottle Volume</label>
+                                        <label class="control-label">Idish hajmi Litrda</label>
                                         <input name="bottleVolume" type="text" class="form-control"
                                                placeholder="Enter In Integers">
                                     </div>
@@ -75,7 +75,7 @@
 
                                 <div class="col-sm-8">
                                     <div class="form-group">
-                                        <label class="control-label">Color</label>
+                                        <label class="control-label">Rang</label>
                                         <div id="cp2" class="input-group mb-2" data-color="rgb(114, 124, 245)"
                                              title="Using data-color attribute in the colorpicker element">
                                             <input name="color" type="text" class="form-control input-lg"/>
@@ -97,17 +97,17 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">List Of Oils</h6>
+                        <h6 class="card-title">Yog'larning Ro'yxati</h6>
                         <div class="table-responsive">
                             <table id="dataTableExample" class="table">
                                 <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Remaining</th>
-                                    <th>Sold/Remaining Ratio</th>
-                                    <th>Bottle Volume</th>
-                                    <th>Last Check In</th>
-                                    <th>Price</th>
+                                    <th>Nomi</th>
+                                    <th>Qolgan Litr</th>
+                                    <th>Qolgan Litr (grafik)</th>
+                                    <th>Idish Hajmi (Litrda)</th>
+                                    <th>Oxirgi Kelgan sana</th>
+                                    <th>1L narxi</th>
                                     <th>Edit / Delete</th>
                                 </tr>
                                 </thead>
