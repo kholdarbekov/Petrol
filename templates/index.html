@@ -18,7 +18,7 @@
 
         <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
             <div>
-                <h4 class="mb-3 mb-md-0">Oil Change Dashboard</h4>
+                <h4 class="mb-3 mb-md-0">Yog' Almashtirish Admin Paneli</h4>
             </div>
             <div class="d-flex align-items-center flex-wrap text-nowrap">
                 <div class="input-group date datepicker dashboard-date mr-2 mb-2 mb-md-0 d-md-none d-xl-flex"
@@ -118,7 +118,7 @@
             <div class="col-12 col-xl-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Line chart</h6>
+                        <h6 class="card-title">Savdo Grafigi</h6>
                         <div id="apexLine"></div>
                     </div>
                 </div>
@@ -130,7 +130,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-baseline mb-2">
-                            <h6 class="card-title mb-0">Last 12 Monthly sales</h6>
+                            <h6 class="card-title mb-0">Oxirgi 12 Oy Savdolari</h6>
                             <div class="dropdown mb-2">
                                 <button class="btn p-0" type="button" id="dropdownMenuButton4" data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
@@ -166,7 +166,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-baseline mb-2">
-                            <h6 class="card-title mb-0">Total Oils Remaining</h6>
+                            <h6 class="card-title mb-0">Umumiy Qolgan Yog'</h6>
                             <div class="dropdown mb-2">
                                 <button class="btn p-0" type="button" id="dropdownMenuButton5" data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
@@ -194,8 +194,8 @@
                         <div class="row mt-4 mb-3">
                             <div class="col-6 d-flex justify-content-end">
                                 <div>
-                                    <label class="d-flex align-items-center justify-content-end tx-10 text-uppercase font-weight-medium">Total
-                                        oil <span class="p-1 ml-1 rounded-circle bg-primary-muted"></span></label>
+                                    <label class="d-flex align-items-center justify-content-end tx-10 text-uppercase font-weight-medium">Umumiy Qolgan
+                                        Yog'lar <span class="p-1 ml-1 rounded-circle bg-primary"></span></label>
                                     <h5 class="font-weight-bold mb-0 text-right">{{ totalRemaining|floatformat:1 }}
                                         L</h5>
                                 </div>
@@ -203,7 +203,7 @@
                             <div class="col-6">
                                 <div>
                                     <label class="d-flex align-items-center tx-10 text-uppercase font-weight-medium"><span
-                                            class="p-1 mr-1 rounded-circle bg-primary"></span> Sold oil</label>
+                                            class="p-1 mr-1 rounded-circle bg-primary-muted"></span> Umumiy Sotilgan Yog'lar</label>
                                     <h5 class="font-weight-bold mb-0">{{ totalSold|floatformat:1 }} L</h5>
                                 </div>
                             </div>
@@ -219,7 +219,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-baseline mb-2">
-                            <h6 class="card-title mb-0">Oils</h6>
+                            <h6 class="card-title mb-0">Yog'lar Ro'yxati</h6>
                             <div class="dropdown mb-2">
                                 <button class="btn p-0" type="button" id="dropdownMenuButton6" data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
@@ -247,18 +247,10 @@
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
-                                    <th>
-                                        Name
-                                    </th>
-                                    <th>
-                                        Progress
-                                    </th>
-                                    <th>
-                                        Price
-                                    </th>
-                                    <th>
-                                        Last Check In
-                                    </th>
+                                    <th>Yog'</th>
+                                    <th>Qolgan</th>
+                                    <th>1L narxi</th>
+                                    <th>Oxirgi Kelgan</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -269,14 +261,16 @@
                                         </td>
                                         <td>
                                             {% with sold=oil|sold:'12' %}
-                                                <div class="progress">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                                                         role="progressbar"
-                                                         style="width: {{ sold|remaining_percent:oil.RemainingLitres }}%"
-                                                         aria-valuenow="{{ sold|remaining_percent:oil.RemainingLitres }}"
-                                                         aria-valuemin="0"
-                                                         aria-valuemax="{{ sold|add:oil.RemainingLitres }}"></div>
-                                                </div>
+                                                {% with percent=sold|remaining_percent:oil.RemainingLitres %}
+                                                    <div class="progress">
+                                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                                             role="progressbar"
+                                                             style="width: {{ percent }}%"
+                                                             aria-valuenow="{{ percent }}"
+                                                             aria-valuemin="0"
+                                                             aria-valuemax="{{ sold|add:oil.RemainingLitres }}">{{ percent|floatformat:0 }} %</div>
+                                                    </div>
+                                                {% endwith %}
                                             {% endwith %}
                                         </td>
                                         <td>
@@ -297,7 +291,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-baseline mb-2">
-                            <h6 class="card-title mb-0">Oil Check In</h6>
+                            <h6 class="card-title mb-0">Yog' Kelishlari Ro'yxati</h6>
                             <div class="dropdown mb-2">
                                 <button class="btn p-0" type="button" id="dropdownMenuButton7" data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
@@ -326,9 +320,9 @@
                                 <thead>
                                 <tr>
                                     <th class="pt-0">#</th>
-                                    <th class="pt-0">Oil Name</th>
-                                    <th class="pt-0">Check In</th>
-                                    <th class="pt-0">Bottles</th>
+                                    <th class="pt-0">Yog' Nomi</th>
+                                    <th class="pt-0">Kelgan Vaqti</th>
+                                    <th class="pt-0">Idish soni</th>
                                     <th class="pt-0">Status</th>
                                     <th class="pt-0">Assign</th>
                                 </tr>

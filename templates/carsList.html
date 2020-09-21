@@ -72,7 +72,7 @@
                                     <th>Umumiy Sotib Olgan Litri</th>
                                     <th>Umumiy Sotib Olgan Narxi</th>
                                     <th>Bonus</th>
-                                    {% if request.user.is_authenticated %}<th>Edit / Delete</th>{% endif %}
+                                    {% if request.user.is_authenticated %}<th>Bonus / Delete</th>{% endif %}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -117,7 +117,7 @@
     <!-- endinject -->
     <!-- custom js for this page -->
     <script src="{% static "js/typeahead.js" %}"></script>
-    <script src="{% static "js/bootstrap-maxlength.js" %}"></script>
+{#    <script src="{% static "js/bootstrap-maxlength.js" %}"></script>#}
     <script src="{% static "js/inputmask.js" %}"></script>
 
     <script src="{% static "vendors/datatables.net/jquery.dataTables.js" %}"></script>

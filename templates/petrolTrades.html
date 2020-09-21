@@ -103,7 +103,7 @@
                                     <th>Savdo Summasi</th>
                                     <th>Benzin</th>
                                     <th>Kun Soat</th>
-                                    <th>Edit / Delete</th>
+                                    <th>Delete</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -115,10 +115,7 @@
                                         <td>{{ trade.price|floatformat:2 }} UZS</td>
                                         <td>{{ trade.petrol }}</td>
                                         <td>{{ trade.tradeDateTime|date:"Y.m.d H:i" }}</td>
-                                        <td><a href="#" class="editor_edit">Edit</a> / <a href="{% url 'trade_delete' %}"
-                                                                                          title="{{ trade.pk }}"
-                                                                                          id="Delete{{ forloop.counter }}"
-                                                                                          class="editor_remove">Delete</a>
+                                        <td><a href="{% url 'trade_delete' %}" title="{{ trade.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a>
                                         </td>
                                     </tr>
                                 {% endfor %}

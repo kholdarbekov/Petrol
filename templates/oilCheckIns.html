@@ -81,7 +81,7 @@
                                     <th>Idish hajmi</th>
                                     <th>Vaqti</th>
                                     <th>Summasi</th>
-                                    <th>Edit / Delete</th>
+                                    <th>Delete</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -92,7 +92,7 @@
                                         <td>{{ checkin.oil.bottleVolume|floatformat:1 }} L</td>
                                         <td>{{ checkin.date|date:"d/m/Y" }}</td>
                                         <td>{{ checkin|checkin_cost }} UZS</td>
-                                        <td><a href="#" class="editor_edit">Edit</a> / <a href="{% url 'oil_checkin_delete' %}" title="{{ checkin.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
+                                        <td><a href="{% url 'oil_checkin_delete' %}" title="{{ checkin.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
                                       </tr>
                                   {% endfor %}
                                 </tbody>

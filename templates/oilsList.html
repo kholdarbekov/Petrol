@@ -119,12 +119,14 @@
                                         <td>
                                             <div class="progress">
                                                 {% with sold=oil|sold:'12' %}
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                                    {% with percent=sold|remaining_percent:oil.RemainingLitres %}
+                                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
                                                          role="progressbar"
-                                                         style="width: {{ sold|remaining_percent:oil.RemainingLitres }}%"
-                                                         aria-valuenow="{{ sold|remaining_percent:oil.RemainingLitres }}"
+                                                         style="width: {{ percent }}%"
+                                                         aria-valuenow="{{ percent }}"
                                                          aria-valuemin="0"
-                                                         aria-valuemax="{{ sold|add:oil.RemainingLitres }}"></div>
+                                                         aria-valuemax="{{ sold|add:oil.RemainingLitres }}">{{ percent|floatformat:0 }} %</div>
+                                                    {% endwith %}
                                                 {% endwith %}
                                             </div>
                                         </td>
