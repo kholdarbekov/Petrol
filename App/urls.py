@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 
 from .views import IndexView, OilsListView, OilCheckInsListView, OilCreateView, OilDeleteView, OilCheckinCreateView, \
     OilCheckinDeleteView, OilTradeCreateView, OilTradeDeleteView, OilTradesListView, CarsListView, CarCreateView, \
-    CarDeleteView, TradesListView, TradeCreateView, TradeDeleteView
+    CarDeleteView, TradesListView, TradeCreateView, TradeDeleteView, OilUpdateView
 
 urlpatterns = [
     path(r'', IndexView.as_view(), name='index'),
@@ -12,6 +12,7 @@ urlpatterns = [
     path(r'oils/', OilsListView.as_view(), name='oils_list'),
     path(r'oils/add/', OilCreateView.as_view(), name='oil_add'),
     path(r'oils/delete/', OilDeleteView.as_view(), name='oil_delete'),
+    path(r'oils/update/', OilUpdateView.as_view(), name='oil_update'),
 
     path(r'oils/checkins/', OilCheckInsListView.as_view(), name='oils_checkins'),
     path(r'oils/checkins/add/', OilCheckinCreateView.as_view(), name='oil_checkin_add'),

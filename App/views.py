@@ -1,12 +1,12 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView, TemplateView, ListView
-from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic import TemplateView, ListView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
 from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol
 from .forms import OilTradeForm, TradeForm
@@ -127,6 +127,18 @@ class OilDeleteView(DeleteView):
         success_url = self.get_success_url()
         self.object.delete()
         return HttpResponse(success_url)
+
+
+class OilUpdateView(UpdateView):
+    model = Oil
+    fields = ['name', 'price', 'RemainingLitres', 'RemainingBottles', 'bottleVolume', 'color']
+    success_url = reverse_lazy('oils_list')
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Oil, name=self.request.POST['name'])
 
 
 class OilCheckInsListView(ListView):

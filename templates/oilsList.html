@@ -108,6 +108,8 @@
                                     <th>Idish Hajmi (Litrda)</th>
                                     <th>Oxirgi Kelgan sana</th>
                                     <th>1L narxi</th>
+                                    <th hidden="hidden">Remaining Bottles</th>
+                                    <th hidden="hidden">Color</th>
                                     <th>Edit / Delete</th>
                                 </tr>
                                 </thead>
@@ -121,11 +123,13 @@
                                                 {% with sold=oil|sold:'12' %}
                                                     {% with percent=sold|remaining_percent:oil.RemainingLitres %}
                                                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                                                         role="progressbar"
-                                                         style="width: {{ percent }}%"
-                                                         aria-valuenow="{{ percent }}"
-                                                         aria-valuemin="0"
-                                                         aria-valuemax="{{ sold|add:oil.RemainingLitres }}">{{ percent|floatformat:0 }} %</div>
+                                                             role="progressbar"
+                                                             style="width: {{ percent }}%"
+                                                             aria-valuenow="{{ percent }}"
+                                                             aria-valuemin="0"
+                                                             aria-valuemax="{{ sold|add:oil.RemainingLitres }}">{{ percent|floatformat:0 }}
+                                                            %
+                                                        </div>
                                                     {% endwith %}
                                                 {% endwith %}
                                             </div>
@@ -133,10 +137,12 @@
                                         <td>{{ oil.bottleVolume|floatformat:1 }} L</td>
                                         <td>{{ oil|last_checkin }}</td>
                                         <td>{{ oil.price|floatformat:1 }} UZS</td>
-                                        <td><a href="#" class="editor_edit">Edit</a> / <a href="{% url 'oil_delete' %}"
-                                                                                          title="{{ oil }}"
-                                                                                          id="Delete{{ forloop.counter }}"
-                                                                                          class="editor_remove">Delete</a>
+                                        <td hidden="hidden">{{ oil.RemainingBottles }}</td>
+                                        <td hidden="hidden">{{ oil.color }}</td>
+                                        <td>
+                                            <a href="#" id="Change{{ forloop.counter }}" class="editor_edit">Edit</a> /
+                                            <a href="{% url 'oil_delete' %}" title="{{ oil }}"
+                                               id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a>
                                         </td>
                                     </tr>
                                 {% endfor %}

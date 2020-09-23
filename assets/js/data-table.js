@@ -51,6 +51,22 @@ $(function() {
             }
           });
         });
+
+        $("a:regex(id,^Change)").unbind('click');
+        $("a:regex(id,^Change)").on("click",function(e) {
+          e.preventDefault(); // cancel the link itself
+          var tbRow = this.parentElement.parentElement;
+          var frm = $('#signupForm');
+
+          frm[0].name.value = tbRow.children[0].textContent;
+          frm[0].RemainingLitres.value = parseInt(tbRow.children[1].textContent);
+          frm[0].bottleVolume.value = parseInt(tbRow.children[3].textContent);
+          frm[0].price.value = parseFloat(tbRow.children[5].textContent.replace(',', ''));
+          frm[0].RemainingBottles.value = tbRow.children[6].textContent;
+          frm[0].color.value = tbRow.children[7].textContent;
+
+          frm[0].action = 'update/';
+        });
       }
     });
 
