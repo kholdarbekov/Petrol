@@ -71,7 +71,7 @@
                                     <th>Model</th>
                                     <th>Umumiy Sotib Olgan Litri</th>
                                     <th>Umumiy Sotib Olgan Narxi</th>
-                                    <th>Bonus</th>
+                                    <th>Ishlatilgan Bonus</th>
                                     {% if request.user.is_authenticated %}<th>Bonus / Delete</th>{% endif %}
                                 </tr>
                                 </thead>
@@ -80,14 +80,13 @@
                                     <tr>
                                         <td>{{ car.carNumber }}</td>
                                         <td>{{ car.model }}</td>
-                                        <td>{{ car.get_trades|get_dict_value_by_key:'litre'|floatformat:1 }} L</td>
+                                        <td>{{ car|tradeLitre:500|floatformat:1 }} L</td>
                                         <td>{{ car.get_trades|get_dict_value_by_key:'total_price'|floatformat:2 }} UZS</td>
-                                        <td>{{ car.get_trades|get_dict_value_by_key:'total_price'|multiply:0.02 }} UZS</td>
+                                        <td>{{ car.used_bonuses }}</td>
                                         {% if request.user.is_authenticated %}
-                                            <td><a href="#" class="editor_edit">Bonus</a> / <a href="{% url 'car_delete' %}"
-                                                                                              title="{{ car.carNumber }}"
-                                                                                              id="Delete{{ forloop.counter }}"
-                                                                                              class="editor_remove">Delete</a>
+                                            <td>
+                                                <a href="{% url 'car_bonus' %}" title="{{ car.carNumber }}" id="CarBonus{{ forloop.counter }}" class="editor_edit">Bonus</a> /
+                                                <a href="{% url 'car_delete' %}" title="{{ car.carNumber }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a>
                                             </td>
                                         {% endif %}
                                     </tr>

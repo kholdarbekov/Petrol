@@ -19,7 +19,7 @@ class CarAdmin(admin.ModelAdmin):
         return '{total_litre} litr, {total_price} so\'m'.format(total_litre=trades['litre'], total_price=trades['total_price'])
     get_trades.short_description = 'Refuelling'
 
-    list_display = ['carNumber', 'model', 'get_trades', 'created', 'last_updated']
+    list_display = ['carNumber', 'model', 'used_bonuses', 'get_trades', 'created', 'last_updated']
 
 
 class PetrolAdmin(admin.ModelAdmin):

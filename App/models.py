@@ -15,6 +15,7 @@ class CarModel(models.Model):
 class Car(models.Model):
     carNumber = models.CharField(primary_key=True, max_length=8)
     model = models.ForeignKey(CarModel, related_name='cars', on_delete=models.CASCADE)
+    used_bonuses = models.PositiveSmallIntegerField(default=0)
     created = models.DateField(auto_now_add=True)
     last_updated = models.DateField(auto_now=True)
 

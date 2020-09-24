@@ -1,6 +1,6 @@
 from django.forms import ModelForm, SplitDateTimeField
 from django.forms.widgets import TextInput
-from .models import Oil, OilTrade, Trade
+from .models import Oil, OilTrade, Trade, Car
 
 
 class OilForm(ModelForm):

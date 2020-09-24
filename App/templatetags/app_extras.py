@@ -76,6 +76,17 @@ def divide(value, arg):
 
 
 @register.filter
+def tradeLitre(car, bonusLimit):
+    try:
+        if car:
+            return car.get_trades()['litre'] - car.used_bonuses * bonusLimit
+        else:
+            return 0
+    except ValueError:
+        return None
+
+
+@register.filter
 def get_item(dictionary, key):
     if dictionary:
         val = dictionary[key]

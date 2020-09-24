@@ -15,7 +15,7 @@ $(function() {
         return regex.test(jQuery(elem)[attr.method](attr.property));
         }
 
-    const csrftoken = Cookies.get('csrftoken');
+    var csrftoken = Cookies.get('csrftoken');
 
     var dataTableExample = $('#dataTableExample').DataTable({
       "aLengthMenu": [
@@ -66,6 +66,40 @@ $(function() {
           frm[0].color.value = tbRow.children[7].textContent;
 
           frm[0].action = 'update/';
+        });
+
+        $("a:regex(id,^CarBonus)").unbind('click');
+        $("a:regex(id,^CarBonus)").on("click",function(e) {
+          e.preventDefault(); // cancel the link itself
+
+          var tbRow = this.parentElement.parentElement;
+
+          var result = confirm(tbRow.children[0].textContent + " ga bonus berilmoqda!");
+          if(!result){
+            return;
+          }
+          else{
+            if (parseInt(tbRow.children[2].textContent.replace(',', '')) < 500){
+              alert("Bu mashina hali bonusga yetmagan")
+              return;
+            }
+          }
+
+          $.ajax({
+            url: this.href,
+            type: 'post',
+            data: {
+                carNumber: this.title
+            },
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            //dataType: 'json',
+            success: function (data) {
+                tbRow.children[4].textContent = (parseInt(tbRow.children[4].textContent) + 1).toString();
+                csrftoken = Cookies.get('csrftoken');
+            }
+          });
         });
       }
     });

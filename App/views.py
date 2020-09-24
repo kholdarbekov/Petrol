@@ -321,6 +321,28 @@ class CarDeleteView(DeleteView):
         return HttpResponse(success_url)
 
 
+class CarBonusUpdateView(UpdateView):
+    model = Car
+    fields = ['carNumber']
+    success_url = reverse_lazy('cars_list')
+    template_name = 'carsList.html'
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Car, carNumber=self.request.POST['carNumber'])
+
+    def form_valid(self, form):
+        trades = form.instance.get_trades()
+        if trades['litre'] >= 500:
+            form.instance.used_bonuses += 1
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+
+
 class TradesListView(ListView):
     model = Trade
     context_object_name = 'trades'
