@@ -97,6 +97,7 @@ $(function() {
             //dataType: 'json',
             success: function (data) {
                 tbRow.children[4].textContent = (parseInt(tbRow.children[4].textContent) + 1).toString();
+                tbRow.children[2].textContent = (parseInt(tbRow.children[2].textContent) - parseInt(tbRow.children[4].textContent) * 500).toString() + ' L'
                 csrftoken = Cookies.get('csrftoken');
             }
           });
