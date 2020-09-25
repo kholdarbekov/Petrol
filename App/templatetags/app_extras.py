@@ -1,6 +1,8 @@
 from django import template
 from django.utils import timezone
 
+from ..views import MANAGER, STAFF, OIL, PETROL, GENERAL
+
 register = template.Library()
 
 
@@ -102,3 +104,35 @@ def get_dict_value_by_key(dictionary, key):
         return dictionary[key]
     else:
         return ''
+
+
+@register.filter
+def is_general_staff(user):
+    if user:
+        return user.first_name.lower().strip() == STAFF and user.last_name.lower().strip() == GENERAL
+    else:
+        return False
+
+
+@register.filter
+def is_oil_staff(user):
+    if user:
+        return user.first_name.lower().strip() == STAFF and user.last_name.lower().strip() == OIL
+    else:
+        return False
+
+
+@register.filter
+def is_petrol_staff(user):
+    if user:
+        return user.first_name.lower().strip() == STAFF and user.last_name.lower().strip() == PETROL
+    else:
+        return False
+
+
+@register.filter
+def is_manager(user):
+    if user:
+        return user.first_name.lower().strip() == MANAGER
+    else:
+        return False

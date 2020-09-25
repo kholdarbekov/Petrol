@@ -11,12 +11,26 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol
 from .forms import OilTradeForm, TradeForm
 
+MANAGER = 'manager'
+STAFF = 'staff'
+OIL = 'oil'
+PETROL = 'petrol'
+GENERAL = 'general'
+
 
 class IndexView(TemplateView):
     template_name = 'index.html'
+    oils_list_page = reverse_lazy('oils_list')
+    petrol_cars_list_page = reverse_lazy('cars_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
+            elif u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -82,9 +96,14 @@ class OilsListView(ListView):
     model = Oil
     context_object_name = 'oils'
     template_name = 'oilsList.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
 
@@ -92,6 +111,15 @@ class OilCreateView(CreateView):
     model = Oil
     fields = ['name', 'price', 'RemainingLitres', 'RemainingBottles', 'bottleVolume', 'color']
     success_url = reverse_lazy('oils_list')
+    petrol_cars_list_page = reverse_lazy('cars_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -110,8 +138,16 @@ class OilCreateView(CreateView):
 class OilDeleteView(DeleteView):
     model = Oil
     success_url = reverse_lazy('oils_list')
-
     http_method_names = ['post', ]
+    petrol_cars_list_page = reverse_lazy('cars_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -133,6 +169,15 @@ class OilUpdateView(UpdateView):
     model = Oil
     fields = ['name', 'price', 'RemainingLitres', 'RemainingBottles', 'bottleVolume', 'color']
     success_url = reverse_lazy('oils_list')
+    petrol_cars_list_page = reverse_lazy('cars_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -149,9 +194,14 @@ class OilCheckInsListView(ListView):
     model = OilCheckIn
     context_object_name = 'oilCheckIns'
     template_name = 'oilCheckIns.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -167,6 +217,15 @@ class OilCheckinCreateView(CreateView):
     fields = ['oil', 'bottles', 'date']
     success_url = reverse_lazy('oils_checkins')
     template_name = 'oilCheckIns.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -185,8 +244,16 @@ class OilCheckinCreateView(CreateView):
 class OilCheckinDeleteView(DeleteView):
     model = OilCheckIn
     success_url = reverse_lazy('oils_checkins')
-
     http_method_names = ['post', ]
+    petrol_cars_list_page = reverse_lazy('cars_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -208,9 +275,14 @@ class OilTradesListView(ListView):
     model = OilTrade
     context_object_name = 'oilTrades'
     template_name = 'oilsTrades.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -227,6 +299,15 @@ class OilTradeCreateView(CreateView):
     success_url = reverse_lazy('oils_trades')
     template_name = 'oilsTrades.html'
     form_class = OilTradeForm
+    petrol_cars_list_page = reverse_lazy('cars_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -248,8 +329,16 @@ class OilTradeCreateView(CreateView):
 class OilTradeDeleteView(DeleteView):
     model = OilTrade
     success_url = reverse_lazy('oils_trades')
-
     http_method_names = ['post', ]
+    petrol_cars_list_page = reverse_lazy('cars_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == PETROL:
+                return redirect(self.petrol_cars_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -271,8 +360,14 @@ class CarsListView(ListView):
     model = Car
     context_object_name = 'cars'
     template_name = 'carsList.html'
+    oils_list_page = reverse_lazy('oils_list')
 
+    @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -288,6 +383,15 @@ class CarCreateView(CreateView):
     fields = ['carNumber', 'model']
     success_url = reverse_lazy('cars_list')
     template_name = 'carsList.html'
+    oils_list_page = reverse_lazy('oils_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -306,8 +410,16 @@ class CarCreateView(CreateView):
 class CarDeleteView(DeleteView):
     model = Car
     success_url = reverse_lazy('cars_list')
-
     http_method_names = ['post', ]
+    oils_list_page = reverse_lazy('oils_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -330,6 +442,15 @@ class CarBonusUpdateView(UpdateView):
     fields = ['carNumber']
     success_url = reverse_lazy('cars_list')
     template_name = 'carsList.html'
+    oils_list_page = reverse_lazy('oils_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -351,9 +472,14 @@ class TradesListView(ListView):
     model = Trade
     context_object_name = 'trades'
     template_name = 'petrolTrades.html'
+    oils_list_page = reverse_lazy('oils_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -370,6 +496,15 @@ class TradeCreateView(CreateView):
     success_url = reverse_lazy('trades_list')
     template_name = 'petrolTrades.html'
     form_class = TradeForm
+    oils_list_page = reverse_lazy('oils_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -387,8 +522,16 @@ class TradeCreateView(CreateView):
 class TradeDeleteView(DeleteView):
     model = Trade
     success_url = reverse_lazy('trades_list')
-
     http_method_names = ['post', ]
+    oils_list_page = reverse_lazy('oils_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        u = self.request.user
+        if u.first_name.lower().strip() == STAFF:
+            if u.last_name.lower().strip() == OIL:
+                return redirect(self.oils_list_page)
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)

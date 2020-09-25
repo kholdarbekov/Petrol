@@ -111,7 +111,7 @@
                                     <th>1L narxi</th>
                                     <th hidden="hidden">Remaining Bottles</th>
                                     <th hidden="hidden">Color</th>
-                                    <th>Edit / Delete</th>
+                                    {% if user|is_manager %}<th>Edit / Delete</th>{% endif %}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -140,11 +140,13 @@
                                         <td>{{ oil.price|floatformat:1 }} UZS</td>
                                         <td hidden="hidden">{{ oil.RemainingBottles }}</td>
                                         <td hidden="hidden">{{ oil.color }}</td>
+                                        {% if user|is_manager %}
                                         <td>
                                             <a href="#" id="Change{{ forloop.counter }}" class="editor_edit">Edit</a> /
                                             <a href="{% url 'oil_delete' %}" title="{{ oil }}"
                                                id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a>
                                         </td>
+                                        {% endif %}
                                     </tr>
                                 {% endfor %}
                                 </tbody>

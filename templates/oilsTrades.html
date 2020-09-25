@@ -93,7 +93,7 @@
                                     <th>Sotilgan Litr</th>
                                     <th>Savdo Summasi</th>
                                     <th>Vaqti</th>
-                                    <th>Delete</th>
+                                    {% if user|is_manager %}<th>Delete</th>{% endif %}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -103,8 +103,9 @@
                                         <td>{{ trade.litreSold|floatformat:1 }} L</td>
                                         <td>{{ trade.tradePrice|floatformat:2 }} UZS</td>
                                         <td>{{ trade.dateTime|date:"Y.m.d H:i" }}</td>
-                                        <td><a href="{% url 'oil_trades_delete' %}" title="{{ trade.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a>
-                                        </td>
+                                        {% if user|is_manager %}
+                                        <td><a href="{% url 'oil_trades_delete' %}" title="{{ trade.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
+                                        {% endif %}
                                     </tr>
                                 {% endfor %}
                                 </tbody>
