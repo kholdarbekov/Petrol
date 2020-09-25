@@ -138,7 +138,11 @@ class OilUpdateView(UpdateView):
         return super().post(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Oil, name=self.request.POST['name'])
+        return get_object_or_404(Oil, name=self.request.POST['oldName'])
+
+    def form_valid(self, form):
+        form.instance.name = self.request.POST['oldName']
+        return super().form_valid(form)
 
 
 class OilCheckInsListView(ListView):

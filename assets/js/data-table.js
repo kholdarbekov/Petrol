@@ -64,6 +64,7 @@ $(function() {
           frm[0].price.value = parseFloat(tbRow.children[5].textContent.replace(',', ''));
           frm[0].RemainingBottles.value = tbRow.children[6].textContent;
           frm[0].color.value = tbRow.children[7].textContent;
+          frm[0].oldName.value = tbRow.children[0].textContent;
 
           frm[0].action = 'update/';
         });
