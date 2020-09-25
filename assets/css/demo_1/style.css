@@ -8780,6 +8780,7 @@ pre {
   display: block;
   width: 100%;
   min-height: 350px;
+  max-height: 600px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch; }
 
