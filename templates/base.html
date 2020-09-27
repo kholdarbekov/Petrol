@@ -28,7 +28,7 @@
         </div>
         <div class="sidebar-body">
             <ul class="nav">
-                {% if user|is_manager or user|is_general_staff %}
+                {% if user.is_manager or user.is_general_staff %}
                     <li class="nav-item nav-category">Dashboards</li>
                     <li class="nav-item">
                         <a href="{% url 'index' %}" class="nav-link">
@@ -46,7 +46,7 @@
 
                 <li class="nav-item nav-category">Management</li>
 
-                {% if user|is_manager or user|is_general_staff or user|is_oil_staff %}
+                {% if user.is_manager or user.is_general_staff or user.is_oil_staff %}
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="collapse" href="#oilChange" role="button" aria-expanded="false"
                            aria-controls="forms">
@@ -70,7 +70,7 @@
                     </li>
                 {% endif %}
 
-                {% if user|is_manager or user|is_general_staff or user|is_petrol_staff %}
+                {% if user.is_manager or user.is_general_staff or user.is_petrol_staff %}
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="collapse" href="#petrol" role="button" aria-expanded="false"
                            aria-controls="forms">

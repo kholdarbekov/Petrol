@@ -135,4 +135,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 USE_THOUSAND_SEPARATOR = True
 
 LOGIN_URL = '/admin/login/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
+

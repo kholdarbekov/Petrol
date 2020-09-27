@@ -1,5 +1,52 @@
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.contrib.auth.models import User
 from django.db import models
+
+
+class Member(User):
+    MANAGER = 'manager'
+    STAFF = 'staff'
+    OIL = 'oil'
+    PETROL = 'petrol'
+    GENERAL = 'general'
+
+    class Meta:
+        proxy = True
+
+    @property
+    def is_general_staff(self):
+        if self:
+            return self.first_name.lower().strip() == self.STAFF and self.last_name.lower().strip() == self.GENERAL
+        else:
+            return False
+
+    @property
+    def is_oil_staff(self):
+        if self:
+            return self.first_name.lower().strip() == self.STAFF and self.last_name.lower().strip() == self.OIL
+        else:
+            return False
+
+    @property
+    def is_petrol_staff(self):
+        if self:
+            return self.first_name.lower().strip() == self.STAFF and self.last_name.lower().strip() == self.PETROL
+        else:
+            return False
+
+    @property
+    def is_manager(self):
+        if self:
+            return self.first_name.lower().strip() == self.MANAGER
+        else:
+            return False
+
+    @property
+    def is_user_staff(self):
+        if self:
+            return self.first_name.lower().strip() == self.STAFF
+        else:
+            return False
 
 
 class CarModel(models.Model):

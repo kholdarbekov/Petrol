@@ -8,14 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol
+from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol, Member
 from .forms import OilTradeForm, TradeForm
-
-MANAGER = 'manager'
-STAFF = 'staff'
-OIL = 'oil'
-PETROL = 'petrol'
-GENERAL = 'general'
 
 
 class IndexView(TemplateView):
@@ -25,12 +19,12 @@ class IndexView(TemplateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
-            elif u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
+        elif member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
+
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -38,6 +32,8 @@ class IndexView(TemplateView):
         last_year_range = [(currentTime - timezone.timedelta(days=356)), currentTime]
 
         context = super(IndexView, self).get_context_data(**kwargs)
+
+        context['user'] = Member.objects.get(username=self.request.user.username)
 
         context['oilTrades'] = {}
 
@@ -100,11 +96,16 @@ class OilsListView(ListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(OilsListView, self).get_context_data(**kwargs)
+        context['user'] = Member.objects.get(username=self.request.user.username)
+
+        return context
 
 
 class OilCreateView(CreateView):
@@ -115,10 +116,9 @@ class OilCreateView(CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -143,10 +143,9 @@ class OilDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -173,10 +172,9 @@ class OilUpdateView(UpdateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -198,16 +196,14 @@ class OilCheckInsListView(ListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the oils
+        context['user'] = Member.objects.get(username=self.request.user.username)
         context['oils'] = Oil.objects.all()
         return context
 
@@ -221,10 +217,9 @@ class OilCheckinCreateView(CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -249,10 +244,9 @@ class OilCheckinDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -279,16 +273,14 @@ class OilTradesListView(ListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the oils
+        context['user'] = Member.objects.get(username=self.request.user.username)
         context['oils'] = Oil.objects.all()
         return context
 
@@ -303,10 +295,9 @@ class OilTradeCreateView(CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -334,10 +325,9 @@ class OilTradeDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == PETROL:
-                return redirect(self.petrol_cars_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_petrol_staff:
+            return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -364,16 +354,14 @@ class CarsListView(ListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the oils
+        context['user'] = Member.objects.get(username=self.request.user.username)
         context['carModels'] = CarModel.objects.all()
         return context
 
@@ -387,10 +375,9 @@ class CarCreateView(CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -415,10 +402,9 @@ class CarDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -446,10 +432,9 @@ class CarBonusUpdateView(UpdateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -476,16 +461,14 @@ class TradesListView(ListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the oils
+        context['user'] = Member.objects.get(username=self.request.user.username)
         context['petrol_list'] = Petrol.objects.all()
         context['cars'] = Car.objects.all()
         return context
@@ -500,10 +483,9 @@ class TradeCreateView(CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -527,10 +509,9 @@ class TradeDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        u = self.request.user
-        if u.first_name.lower().strip() == STAFF:
-            if u.last_name.lower().strip() == OIL:
-                return redirect(self.oils_list_page)
+        member = Member.objects.get(username=self.request.user.username)
+        if member.is_oil_staff:
+            return redirect(self.oils_list_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):

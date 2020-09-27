@@ -103,7 +103,7 @@
                                     <th>Savdo Summasi</th>
                                     <th>Benzin</th>
                                     <th>Kun Soat</th>
-                                    {% if user|is_manager %}<th>Delete</th>{% endif %}
+                                    {% if user.is_manager %}<th>Delete</th>{% endif %}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -115,7 +115,7 @@
                                         <td>{{ trade.price|floatformat:2 }} UZS</td>
                                         <td>{{ trade.petrol }}</td>
                                         <td>{{ trade.tradeDateTime|date:"Y.m.d H:i" }}</td>
-                                        {% if user|is_manager %}
+                                        {% if user.is_manager %}
                                         <td><a href="{% url 'trade_delete' %}" title="{{ trade.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
                                         {% endif %}
                                     </tr>
