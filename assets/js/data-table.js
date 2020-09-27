@@ -80,7 +80,7 @@ $(function() {
             return;
           }
           else{
-            if (parseInt(tbRow.children[2].textContent.replace(',', '')) < 500){
+            if (parseInt(tbRow.children[2].textContent.replace(',', '')) < BonusLimit){
               alert("Bu mashina hali bonusga yetmagan")
               return;
             }
@@ -98,7 +98,7 @@ $(function() {
             //dataType: 'json',
             success: function (data) {
                 tbRow.children[4].textContent = (parseInt(tbRow.children[4].textContent) + 1).toString();
-                tbRow.children[2].textContent = (parseInt(tbRow.children[2].textContent) - parseInt(tbRow.children[4].textContent) * 500).toString() + ' L'
+                tbRow.children[2].textContent = (parseInt(tbRow.children[2].textContent.replace(',', '')) - BonusLimit).toString() + ' L'
                 csrftoken = Cookies.get('csrftoken');
             }
           });

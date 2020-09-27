@@ -378,9 +378,9 @@
         // Apex Line chart start
         var options = {
             chart: {
-                height: 450,
+                height: {{ oils|chart_height }},
                 type: "line",
-                parentHeightOffset: 0,
+                parentHeightOffset: 10,
             },
             colors: [
                 {% for name, oil in oils.items %}"{{ oil.color }}"{% if not forloop.last %}, {% endif %}{% endfor %}
@@ -463,7 +463,7 @@
             },
             responsive: [
                 {
-                    breakpoint: 500,
+                    breakpoint: 400,
                     options: {
                         legend: {
                             fontSize: "11px"

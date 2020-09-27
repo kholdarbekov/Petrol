@@ -138,3 +138,4 @@ LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
 
+PETROL_BONUS_LIMIT = 500

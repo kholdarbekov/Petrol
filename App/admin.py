@@ -1,6 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
-from .models import CarModel, Car, Petrol, Trade, Oil, OilTrade, OilCheckIn
+from .models import CarModel, Car, Petrol, Trade, Oil, OilTrade, OilCheckIn, Config
 from .forms import OilForm
 
 
@@ -9,17 +8,16 @@ admin.site.site_header = 'Petrol'
 admin.site.site_title = 'Petrol'
 
 
+class ConfigAdmin(admin.ModelAdmin):
+    list_display = ['petrol_bonus_limit']
+
+
 class CarModelAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'created']
 
 
 class CarAdmin(admin.ModelAdmin):
-    def get_trades(self, obj):
-        trades = obj.get_trades()
-        return '{total_litre} litr, {total_price} so\'m'.format(total_litre=trades['litre'], total_price=trades['total_price'])
-    get_trades.short_description = 'Refuelling'
-
-    list_display = ['carNumber', 'model', 'used_bonuses', 'get_trades', 'created', 'last_updated']
+    list_display = ['carNumber', 'model', 'used_bonuses', 'total_bought_litres', 'total_bought_price', 'created', 'last_updated']
 
 
 class PetrolAdmin(admin.ModelAdmin):
@@ -44,11 +42,8 @@ class OilTradeAdmin(admin.ModelAdmin):
 
     def delete_queryset(self, request, queryset):
         for obj in queryset:
-
             obj.oil.RemainingLitres += obj.litreSold
-
             obj.oil.RemainingBottles = ((obj.oil.RemainingLitres) // obj.oil.bottleVolume)
-
             obj.oil.save()
         super(OilTradeAdmin, self).delete_queryset(request, queryset)
 
@@ -66,6 +61,7 @@ class OilCheckInAdmin(admin.ModelAdmin):
         super(OilCheckInAdmin, self).delete_queryset(request, queryset)
 
 
+admin.site.register(Config, ConfigAdmin)
 admin.site.register(CarModel, CarModelAdmin)
 admin.site.register(Car, CarAdmin)
 admin.site.register(Petrol, PetrolAdmin)

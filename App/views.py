@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.conf import settings
 
 from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol, Member
 from .forms import OilTradeForm, TradeForm
@@ -363,6 +364,7 @@ class CarsListView(ListView):
         context = super().get_context_data(**kwargs)
         context['user'] = Member.objects.get(username=self.request.user.username)
         context['carModels'] = CarModel.objects.all()
+        context['bonus_limit'] = settings.PETROL_BONUS_LIMIT
         return context
 
 
@@ -444,9 +446,9 @@ class CarBonusUpdateView(UpdateView):
         return get_object_or_404(Car, carNumber=self.request.POST['carNumber'])
 
     def form_valid(self, form):
-        trades = form.instance.get_trades()
-        if trades['litre'] >= 500:
+        if form.instance.total_litres_after_bonus >= settings.PETROL_BONUS_LIMIT:
             form.instance.used_bonuses += 1
+            form.instance.total_litres_after_bonus -= settings.PETROL_BONUS_LIMIT
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -471,6 +473,7 @@ class TradesListView(ListView):
         context['user'] = Member.objects.get(username=self.request.user.username)
         context['petrol_list'] = Petrol.objects.all()
         context['cars'] = Car.objects.all()
+        context['bonus_limit'] = settings.PETROL_BONUS_LIMIT
         return context
 
 

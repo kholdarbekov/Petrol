@@ -80,8 +80,8 @@
                                     <tr>
                                         <td>{{ car.carNumber }}</td>
                                         <td>{{ car.model }}</td>
-                                        <td>{{ car|tradeLitre:500|floatformat:1 }} L</td>
-                                        <td>{{ car.get_trades|get_dict_value_by_key:'total_price'|floatformat:2 }} UZS</td>
+                                        <td>{{ car.total_litres_after_bonus|floatformat:1 }} L</td>
+                                        <td>{{ car.total_bought_price|floatformat:2 }} UZS</td>
                                         <td>{{ car.used_bonuses }}</td>
                                         {% if user.is_authenticated and user.is_manager %}
                                             <td>
@@ -122,6 +122,9 @@
     <script src="{% static "vendors/datatables.net/jquery.dataTables.js" %}"></script>
     <script src="{% static "vendors/datatables.net-bs4/dataTables.bootstrap4.js" %}"></script>
     <script src="{% static "vendors/js-coockie/js.cookie.min.js" %}"></script>
+    <script>
+    var BonusLimit = {{ bonus_limit }};
+    </script>
     <script src="{% static "js/data-table.js" %}"></script>
     <script>
       var substringMatcher = function(strs) {

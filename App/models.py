@@ -1,6 +1,24 @@
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
+
+
+class Config(models.Model):
+    petrol_bonus_limit = models.PositiveSmallIntegerField(default=500)
+
+    def __str__(self):
+        return '%d' % self.petrol_bonus_limit
+
+    def clean(self):
+        if not self.pk and Config.objects.exists():
+            # if you'll not check for self.pk
+            # then error will also raised in update of exists model
+            raise ValidationError('There can be only one Config instance')
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        settings.PETROL_BONUS_LIMIT = self.petrol_bonus_limit
+        return super(Config, self).save(force_insert, force_update, using, update_fields)
 
 
 class Member(User):
@@ -63,22 +81,18 @@ class Car(models.Model):
     carNumber = models.CharField(primary_key=True, max_length=8)
     model = models.ForeignKey(CarModel, related_name='cars', on_delete=models.CASCADE)
     used_bonuses = models.PositiveSmallIntegerField(default=0)
+    total_bought_litres = models.PositiveSmallIntegerField(default=0)
+    total_bought_price = models.DecimalField(default=0, decimal_places=2, max_digits=12)
+    total_litres_after_bonus = models.PositiveSmallIntegerField(default=0)
     created = models.DateField(auto_now_add=True)
     last_updated = models.DateField(auto_now=True)
 
-    def get_trades(self):
-        trades = {'litre': 0, 'total_price': 0}
-        for t in self.trades.all():
-            trades['litre'] += t.litre
-            trades['total_price'] += t.price
-        return trades
+    @property
+    def get_litres_after_bonuses(self):
+        return self.total_bought_litres - self.used_bonuses * settings.PETROL_BONUS_LIMIT
 
     def __str__(self):
         return '{carNumber} {model}'.format(carNumber=self.carNumber, model=self.model)
-
-    class Meta:
-        verbose_name = 'Машина'
-        verbose_name_plural = 'Машины'
 
 
 class Petrol(models.Model):  # Benzin
@@ -103,14 +117,30 @@ class Trade(models.Model):  # for Petrol
         return '{car} {petrol} {litre} litr {time}'.format(car=self.car.carNumber, petrol=self.petrol.brand, litre=self.litre, time=self.tradeDateTime.strftime("%Y-%m-%d %H:%M"))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        try:
-            self.price = self.litre * self.petrol.price
-        except ObjectDoesNotExist:
-            self.price = 0
-        except MultipleObjectsReturned:
-            self.price = 0
+        if self.litre <= settings.PETROL_BONUS_LIMIT:
+            try:
+                self.price = self.litre * self.petrol.price
+                self.car.total_bought_litres += self.litre
+                self.car.total_litres_after_bonus += self.litre
+                self.car.total_bought_price += self.price
+                self.car.save()
+            except ObjectDoesNotExist:
+                self.price = 0
+            except MultipleObjectsReturned:
+                self.price = 0
 
-        super(Trade, self).save(force_insert, force_update, using, update_fields)
+            super(Trade, self).save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        self.car.total_bought_litres -= self.litre
+        if self.litre > self.car.total_litres_after_bonus:
+            self.car.total_litres_after_bonus = settings.PETROL_BONUS_LIMIT + self.car.total_litres_after_bonus - self.litre
+            self.car.used_bonuses -= 1
+        else:
+            self.car.total_litres_after_bonus -= self.litre
+        self.car.total_bought_price -= self.price
+        self.car.save()
+        super(Trade, self).delete(using, keep_parents)
 
     class Meta:
         verbose_name = verbose_name_plural = 'Refuelling'
@@ -167,6 +197,12 @@ class OilTrade(models.Model):
             self.tradePrice = 0
         super(OilTrade, self).save(force_insert, force_update, using, update_fields)
 
+    def delete(self, using=None, keep_parents=False):
+        self.oil.RemainingLitres += self.litreSold
+        self.oil.RemainingBottles = self.oil.RemainingLitres // self.oil.bottleVolume
+        self.oil.save()
+        super(OilTrade, self).delete(using, keep_parents)
+
     class Meta:
         verbose_name = 'Oil Trade'
         verbose_name_plural = 'Oil Trades'
@@ -186,3 +222,9 @@ class OilCheckIn(models.Model):
         self.oil.save()
 
         super(OilCheckIn, self).save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        self.oil.RemainingBottles -= self.bottles
+        self.oil.RemainingLitres -= self.bottles * self.oil.bottleVolume
+        self.oil.save()
+        super(OilCheckIn, self).delete(using, keep_parents)

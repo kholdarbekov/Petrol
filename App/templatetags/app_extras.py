@@ -78,17 +78,6 @@ def divide(value, arg):
 
 
 @register.filter
-def tradeLitre(car, bonusLimit):
-    try:
-        if car:
-            return car.get_trades()['litre'] - car.used_bonuses * bonusLimit
-        else:
-            return 0
-    except ValueError:
-        return None
-
-
-@register.filter
 def get_item(dictionary, key):
     if dictionary:
         val = dictionary[key]
@@ -104,3 +93,12 @@ def get_dict_value_by_key(dictionary, key):
         return dictionary[key]
     else:
         return ''
+
+
+@register.filter
+def chart_height(oils):
+    base_height = 300
+    if oils:
+        return base_height + (int(oils.__len__()) // 15) * 50
+    else:
+        return base_height
