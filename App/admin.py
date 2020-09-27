@@ -14,23 +14,42 @@ class ConfigAdmin(admin.ModelAdmin):
 
 class CarModelAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'created']
+    list_per_page = 50
+    search_fields = ['name']
+    list_filter = ['name']
+    date_hierarchy = 'created'
 
 
 class CarAdmin(admin.ModelAdmin):
     list_display = ['carNumber', 'model', 'used_bonuses', 'total_bought_litres', 'total_bought_price', 'created', 'last_updated']
+    list_per_page = 30
+    search_fields = ['carNumber', 'model__name']
+    list_filter = ['model']
+    date_hierarchy = 'created'
 
 
 class PetrolAdmin(admin.ModelAdmin):
     list_display = ['brand', 'price']
+    list_per_page = 10
+    search_fields = ['brand']
+    list_filter = ['brand']
 
 
 class TradeAdmin(admin.ModelAdmin):
     list_display = ['car', 'petrol', 'litre', 'price', 'tradeDateTime']
+    list_per_page = 30
+    search_fields = ['car__carNumber', 'car__model__name', 'petrol__brand', 'litre']
+    list_filter = ['petrol']
+    date_hierarchy = 'tradeDateTime'
 
 
 class OilAdmin(admin.ModelAdmin):
     list_display = ['name', 'price', 'RemainingLitres', 'RemainingBottles', 'bottleVolume']
     form = OilForm
+    list_per_page = 30
+    search_fields = ['name']
+    list_filter = ['bottleVolume']
+    date_hierarchy = 'created'
 
 
 class OilTradeAdmin(admin.ModelAdmin):
@@ -39,6 +58,10 @@ class OilTradeAdmin(admin.ModelAdmin):
     get_dt.short_description = 'Time'
 
     list_display = ['oil', 'litreSold', 'tradePrice', 'get_dt']
+    list_per_page = 30
+    search_fields = ['oil__name']
+    list_filter = ['oil']
+    date_hierarchy = 'dateTime'
 
     def delete_queryset(self, request, queryset):
         for obj in queryset:
@@ -50,6 +73,10 @@ class OilTradeAdmin(admin.ModelAdmin):
 
 class OilCheckInAdmin(admin.ModelAdmin):
     list_display = ['oil', 'bottles']
+    list_per_page = 30
+    search_fields = ['oil__name']
+    list_filter = ['oil']
+    date_hierarchy = 'date'
 
     def delete_queryset(self, request, queryset):
         for obj in queryset:
