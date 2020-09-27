@@ -67,6 +67,10 @@ class Member(User):
             return False
 
 
+def get_super_user():
+    return Member.objects.get(is_superuser=True).id
+
+
 class CarModel(models.Model):
     name = models.CharField(primary_key=True, max_length=31)
     description = models.TextField(blank=True, null=True)
@@ -86,6 +90,7 @@ class Car(models.Model):
     total_litres_after_bonus = models.PositiveSmallIntegerField(default=0)
     created = models.DateField(auto_now_add=True)
     last_updated = models.DateField(auto_now=True)
+    created_by = models.ForeignKey(Member, related_name='created_cars', on_delete=models.SET(get_super_user), default=get_super_user)
 
     @property
     def get_litres_after_bonuses(self):
@@ -112,6 +117,7 @@ class Trade(models.Model):  # for Petrol
     litre = models.PositiveSmallIntegerField()
     tradeDateTime = models.DateTimeField(blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, blank=True)
+    created_by = models.ForeignKey(Member, related_name='created_petrol_trades', on_delete=models.SET(get_super_user), default=get_super_user)
 
     def __str__(self):
         return '{car} {petrol} {litre} litr {time}'.format(car=self.car.carNumber, petrol=self.petrol.brand, litre=self.litre, time=self.tradeDateTime.strftime("%Y-%m-%d %H:%M"))
@@ -154,6 +160,7 @@ class Oil(models.Model):
     bottleVolume = models.DecimalField(max_digits=7, decimal_places=2, default=0)
     color = models.CharField(null=True, blank=True, max_length=7)
     created = models.DateField(auto_now=True)
+    created_by = models.ForeignKey(Member, related_name='created_oils', on_delete=models.SET(get_super_user), default=get_super_user)
 
     def __str__(self):
         return self.name
@@ -168,6 +175,7 @@ class OilTrade(models.Model):
     litreSold = models.DecimalField(decimal_places=1, max_digits=4)
     tradePrice = models.DecimalField(decimal_places=2, max_digits=12, default=0)
     dateTime = models.DateTimeField(blank=True)
+    created_by = models.ForeignKey(Member, related_name='created_oil_trades', on_delete=models.SET(get_super_user), default=get_super_user)
 
     def __str__(self):
         return '{oil} dan {litre} litr {time}'.format(oil=self.oil, litre=self.litreSold, time=self.dateTime.strftime("%Y-%m-%d %H:%M"))
@@ -212,6 +220,7 @@ class OilCheckIn(models.Model):
     oil = models.ForeignKey(Oil, related_name='checkins', on_delete=models.CASCADE)
     bottles = models.PositiveIntegerField(default=0)
     date = models.DateField(blank=True)
+    created_by = models.ForeignKey(Member, related_name='created_oil_checkins', on_delete=models.SET(get_super_user), default=get_super_user)
 
     def __str__(self):
         return '{oil} dan {bottles} ta keldi'.format(oil=self.oil, bottles=self.bottles)
