@@ -72,6 +72,7 @@
                                     <th>Umumiy Sotib Olgan Litri</th>
                                     <th>Umumiy Sotib Olgan Narxi</th>
                                     <th>Ishlatilgan Bonus</th>
+                                    <th>Kirgizgan</th>
                                     {% if user.is_authenticated and user.is_manager %}<th>Bonus / Delete</th>{% endif %}
                                 </tr>
                                 </thead>
@@ -83,6 +84,7 @@
                                         <td>{{ car.total_litres_after_bonus|floatformat:1 }} L</td>
                                         <td>{{ car.total_bought_price|floatformat:2 }} UZS</td>
                                         <td>{{ car.used_bonuses }}</td>
+                                        <td>{{ car.created_by }}</td>
                                         {% if user.is_authenticated and user.is_manager %}
                                             <td>
                                                 <a href="{% url 'car_bonus' %}" title="{{ car.carNumber }}" id="CarBonus{{ forloop.counter }}" class="editor_edit">Bonus</a> /

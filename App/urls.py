@@ -1,10 +1,11 @@
 from django.conf.urls import url
-from django.urls import path
-from django.views.generic import TemplateView
+from django.urls import path, re_path
 
 from .views import IndexView, OilsListView, OilCheckInsListView, OilCreateView, OilDeleteView, OilCheckinCreateView, \
     OilCheckinDeleteView, OilTradeCreateView, OilTradeDeleteView, OilTradesListView, CarsListView, CarCreateView, \
-    CarDeleteView, TradesListView, TradeCreateView, TradeDeleteView, OilUpdateView, CarBonusUpdateView
+    CarDeleteView, TradesListView, TradeCreateView, TradeDeleteView, OilUpdateView, CarBonusUpdateView, \
+    ProductsListView, ProductCreateView, ProductDeleteView, ProductUpdateView, ProductCheckInsListView, \
+    ProductCheckinCreateView, ProductCheckinDeleteView, ProductTradesListView, ProductTradeCreateView, ProductTradeDeleteView
 
 urlpatterns = [
     path(r'', IndexView.as_view(), name='index'),
@@ -30,4 +31,17 @@ urlpatterns = [
     path(r'petrol/trades/', TradesListView.as_view(), name='trades_list'),
     path(r'petrol/trades/add/', TradeCreateView.as_view(), name='trade_add'),
     path(r'petrol/trades/delete/', TradeDeleteView.as_view(), name='trade_delete'),
+
+    re_path(r'^products/(?P<slug>[-\w]+)/$', ProductsListView.as_view(), name='products_list'),
+    re_path(r'^products/(?P<slug>[-\w]+)/add/$', ProductCreateView.as_view(), name='product_add'),
+    re_path(r'^products/(?P<slug>[-\w]+)/delete/$', ProductDeleteView.as_view(), name='product_delete'),
+    re_path(r'^products/(?P<slug>[-\w]+)/update/$', ProductUpdateView.as_view(), name='product_update'),
+
+    re_path(r'^products/(?P<slug>[-\w]+)/checkins/$', ProductCheckInsListView.as_view(), name='products_checkins'),
+    re_path(r'^products/(?P<slug>[-\w]+)/checkins/add/$', ProductCheckinCreateView.as_view(), name='product_checkin_add'),
+    re_path(r'^products/(?P<slug>[-\w]+)/checkins/delete/$', ProductCheckinDeleteView.as_view(), name='product_checkin_delete'),
+
+    re_path(r'^products/(?P<slug>[-\w]+)/trades/$', ProductTradesListView.as_view(), name='products_trades'),
+    re_path(r'^products/(?P<slug>[-\w]+)/trades/add/$', ProductTradeCreateView.as_view(), name='product_trades_add'),
+    re_path(r'^products/(?P<slug>[-\w]+)/trades/delete/$', ProductTradeDeleteView.as_view(), name='product_trades_delete'),
 ]

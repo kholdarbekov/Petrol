@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static app_extras %}
 
-{% block title %}Petrol Trades{% endblock %}
+{% block title %}Product Trades{% endblock %}
 
 {% block css_block %}
     <!-- plugin css for this page -->
@@ -23,8 +23,8 @@
 
         <nav class="page-breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Petrol</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Petrol Trades</li>
+                <li class="breadcrumb-item"><a href="#">Products</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ product_category }}</li>
             </ol>
         </nav>
 
@@ -32,31 +32,23 @@
             <div class="col-md-12 grid-margin">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Benzin Savdosi Qo'shish</h6>
-                        <form action="{% url 'trade_add' %}" method="post">
+                        <h6 class="card-title">{{ product_category }} Savdosini Qo'shish</h6>
+                        <form action="{% url 'product_trades_add' product_category.slug %}" method="post">
                             {% csrf_token %}
                             {{ form.non_field_errors }}
                             <div class="row">
-                                <div class="col-sm-5">
+                                <div class="col-sm-7">
                                     <div class="form-group">
-                                        <label>Mashina</label>
-                                        <div id="the-cars">
-                                            <input value="{{ form|get_item:'car' }}" name="car" required="required" class="typeahead" type="text" placeholder="Mashina Raqami">
+                                        <label>{{ product_category }}</label>
+                                        <div id="the-basics">
+                                            <input value="{{ form|get_item:'oil' }}" name="product" required="required" class="typeahead" type="text" placeholder="{{ product_category }} Nomi">
                                         </div>
                                     </div>
                                 </div><!-- Col -->
                                 <div class="col-sm-5">
                                     <div class="form-group">
-                                        <label>Benzin</label>
-                                        <div id="the-petrols">
-                                            <input value="{{ form|get_item:'petrol' }}" name="petrol" required="required" class="typeahead" type="text" placeholder="Benzin Nomi">
-                                        </div>
-                                    </div>
-                                </div><!-- Col -->
-                                <div class="col-sm-2">
-                                    <div class="form-group">
-                                        <label class="control-label">Sotilgan Litr</label>
-                                        <input name="litre" required="required" type="number" min="1" max="{{ bonus_limit }}" class="form-control" placeholder="Enter in Integers">
+                                        <label class="control-label">Nechchi {{ product_category.quantity_measure }} Sotildi</label>
+                                        <input name="sold_product_quantity" required="required" type="number" class="form-control" placeholder="Enter in Integers">
                                     </div>
                                 </div><!-- Col -->
                             </div><!-- Row -->
@@ -65,7 +57,7 @@
                                     <div class="form-group">
                                         <label class="control-label">Kun</label>
                                         <div class="input-group date datepicker" id="datePickerExample">
-                                            <input name="tradeDateTime_0" type="text" class="form-control"><span class="input-group-addon"><i data-feather="calendar"></i></span>
+                                            <input name="dateTime_0" type="text" class="form-control"><span class="input-group-addon"><i data-feather="calendar"></i></span>
                                         </div>
                                     </div>
                                 </div>
@@ -73,7 +65,7 @@
                                     <div class="form-group">
                                         <label class="control-label">Soat</label>
                                         <div class="input-group date timepicker" id="datetimepickerExample" data-target-input="nearest">
-                                            <input name="tradeDateTime_1" type="text" required="required" class="form-control datetimepicker-input" data-target="#datetimepickerExample"/>
+                                            <input name="dateTime_1" type="text" required="required" class="form-control datetimepicker-input" data-target="#datetimepickerExample"/>
                                             <div class="input-group-append" data-target="#datetimepickerExample" data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i data-feather="clock"></i></div>
                                             </div>
@@ -92,31 +84,29 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title">Benzin Savdolari Ro'yxati</h6>
+                        <h6 class="card-title">{{ product_category }} Savdolari Ro'yxati</h6>
                         <div class="table-responsive">
                             <table id="dataTableExample" class="table">
                                 <thead>
                                 <tr>
-                                    <th>Mashina</th>
-                                    <th>Sotilgan Litr</th>
+                                    <th>{{ product_category }} Nomi</th>
+                                    <th>Qancha Sotilgan</th>
                                     <th>Savdo Summasi</th>
-                                    <th>Benzin</th>
-                                    <th>Kun Soat</th>
+                                    <th>Vaqti</th>
                                     <th>Kirgizgan</th>
                                     {% if user.is_manager %}<th>Delete</th>{% endif %}
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for trade in trades %}
+                                {% for trade in productTrades %}
                                     <tr>
-                                        <td>{{ trade.car }}</td>
-                                        <td>{{ trade.litre|floatformat:1 }} L</td>
-                                        <td>{{ trade.price|floatformat:2 }} UZS</td>
-                                        <td>{{ trade.petrol }}</td>
-                                        <td>{{ trade.tradeDateTime|date:"Y.m.d H:i" }}</td>
+                                        <td>{{ trade.product.name }}</td>
+                                        <td>{{ trade.sold_product_quantity|floatformat:1 }} {{ trade.product.category.quantity_measure }}</td>
+                                        <td>{{ trade.tradePrice|floatformat:2 }} UZS</td>
+                                        <td>{{ trade.dateTime|date:"Y.m.d H:i" }}</td>
                                         <td>{{ trade.created_by }}</td>
                                         {% if user.is_manager %}
-                                        <td><a href="{% url 'trade_delete' %}" title="{{ trade.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
+                                        <td><a href="{% url 'product_trades_delete' product_category.slug %}" title="{{ trade.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
                                         {% endif %}
                                     </tr>
                                 {% endfor %}
@@ -176,36 +166,20 @@
           cb(matches);
         };
       };
-      var petrol_list = [
-          {% for petrol in petrol_list %}
-              "{{ petrol }}"
+      var products = [
+          {% for product in products %}
+              "{{ product.name }}"
               {% if not forloop.last %},{% endif %}
           {% endfor %}
       ];
 
-      var cars = [
-          {% for car in cars %}
-              "{{ car }}"
-              {% if not forloop.last %},{% endif %}
-          {% endfor %}
-      ];
-
-      $('#the-cars .typeahead').typeahead({
+      $('#the-basics .typeahead').typeahead({
         hint: true,
         highlight: true,
         minLength: 1
       }, {
-        name: 'cars',
-        source: substringMatcher(cars)
-      });
-
-      $('#the-petrols .typeahead').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 1
-      }, {
-        name: 'petrol_list',
-        source: substringMatcher(petrol_list)
+        name: 'products',
+        source: substringMatcher(products)
       });
     </script>
     <!-- end custom js for this page -->

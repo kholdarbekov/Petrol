@@ -1,19 +1,7 @@
 from django import template
 from django.utils import timezone
 
-from ..models import Member
-
 register = template.Library()
-
-
-@register.filter
-def checkins(oil, delta_months='12'):
-    total = 0
-    curTime = timezone.localtime(timezone.now())
-    from_time = curTime - timezone.timedelta(days=int(delta_months)*30)
-    for c in oil.checkins.filter(dateTime__range=[from_time, curTime]).order_by('-dateTime'):
-        total += c.oil.bottleVolume * c.bottles
-    return total
 
 
 @register.filter
@@ -48,7 +36,7 @@ def checkin_cost(checkin):
 def remaining_percent(sold, remainingLitres):
     try:
         if sold or sold > 0:
-            return 100 - round(int(sold) / (int(remainingLitres) + int(sold)) * 100, 2)
+            return 100 - round(float(sold) / (float(remainingLitres) + float(sold)) * 100, 2)
         else:
             return 100
     except (ValueError, ZeroDivisionError):
@@ -59,7 +47,7 @@ def remaining_percent(sold, remainingLitres):
 def multiply(value, arg):
     try:
         if value:
-            return int(value) * float(arg)
+            return float(value) * float(arg)
         else:
             return 0
     except ValueError:
@@ -70,7 +58,7 @@ def multiply(value, arg):
 def divide(value, arg):
     try:
         if value:
-            return int(value) / int(arg)
+            return float(value) / float(arg)
         else:
             return None
     except (ValueError, ZeroDivisionError):

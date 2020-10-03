@@ -32,7 +32,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h6 class="card-title">Yangi Yog' Turi Qo'shish</h6>
-                        <form action="{% url 'oil_add' %}" method="post" id="signupForm">
+                        <form action="{% url 'oil_add' %}" method="post" id="signupForm" name="oilsList">
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col-sm-4">
@@ -104,13 +104,15 @@
                                 <thead>
                                 <tr>
                                     <th>Nomi</th>
-                                    <th>Qolgan Litr</th>
-                                    <th>Qolgan Litr (grafik)</th>
-                                    <th>Idish Hajmi (Litrda)</th>
-                                    <th>Oxirgi Kelgan sana</th>
+                                    <th>Qolgan</th>
+                                    <th>Qolgan %</th>
+                                    <th>Idish Hajmi</th>
+                                    <th>Oxirgi Kelgan</th>
+                                    <th>Qolgan Idish</th>
                                     <th>1L narxi</th>
-                                    <th hidden="hidden">Remaining Bottles</th>
                                     <th hidden="hidden">Color</th>
+                                    <th>1 Idish Narxi</th>
+                                    <th>Kirgizgan</th>
                                     {% if user.is_manager %}<th>Edit / Delete</th>{% endif %}
                                 </tr>
                                 </thead>
@@ -137,9 +139,11 @@
                                         </td>
                                         <td>{{ oil.bottleVolume|floatformat:1 }} L</td>
                                         <td>{{ oil|last_checkin }}</td>
-                                        <td>{{ oil.price|floatformat:1 }} UZS</td>
-                                        <td hidden="hidden">{{ oil.RemainingBottles }}</td>
+                                        <td>{{ oil.RemainingBottles|floatformat:0 }}</td>
+                                        <td>{{ oil.price|floatformat:2 }} UZS</td>
                                         <td hidden="hidden">{{ oil.color }}</td>
+                                        <td>{{ oil.price|multiply:oil.bottleVolume|floatformat:2 }} UZS</td>
+                                        <td>{{ oil.created_by }}</td>
                                         {% if user.is_manager %}
                                         <td>
                                             <a href="#" id="Change{{ forloop.counter }}" class="editor_edit">Edit</a> /

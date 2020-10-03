@@ -178,7 +178,7 @@ class OilTrade(models.Model):
     created_by = models.ForeignKey(Member, related_name='created_oil_trades', on_delete=models.SET(get_super_user), default=get_super_user)
 
     def __str__(self):
-        return '{oil} dan {litre} litr {time}'.format(oil=self.oil, litre=self.litreSold, time=self.dateTime.strftime("%Y-%m-%d %H:%M"))
+        return '{oil} dan {litre} litr'.format(oil=self.oil, litre=self.litreSold)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         try:
@@ -237,3 +237,113 @@ class OilCheckIn(models.Model):
         self.oil.RemainingLitres -= self.bottles * self.oil.bottleVolume
         self.oil.save()
         super(OilCheckIn, self).delete(using, keep_parents)
+
+
+class ProductCategory(models.Model):
+    LITRE = 'Litre'
+    PIECE = 'Piece'
+    METRE = 'Metre'
+    KILOGRAM = 'Kilogram'
+
+    LITRE_UZB = 'Litr'
+    PIECE_UZB = 'Dona'
+    METRE_UZB = 'Metr'
+    KILOGRAM_UZB = 'Kg'
+
+    QUANTITY_MEASURES = [
+        (LITRE_UZB, LITRE),
+        (PIECE_UZB, PIECE),
+        (METRE_UZB, METRE),
+        (KILOGRAM_UZB, KILOGRAM),
+    ]
+
+    name = models.CharField(max_length=63)
+    quantity_measure = models.CharField(max_length=31, choices=QUANTITY_MEASURES)
+    slug = models.SlugField(null=False, unique=True)
+    has_bonus = models.BooleanField(default=False)
+    bonus_limit_quantity = models.DecimalField(decimal_places=2, max_digits=12, default=0)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.has_bonus:
+            settings.PRODUCTS_BONUS_LIMITS[self.slug] = self.bonus_limit_quantity
+        else:
+            self.bonus_limit_quantity = 0
+            if self.slug in settings.PRODUCTS_BONUS_LIMITS:
+                settings.PRODUCTS_BONUS_LIMITS.pop(self.slug)
+        super(ProductCategory, self).save(force_insert, force_update, using, update_fields)
+
+
+def get_product_default_category():
+    return ProductCategory.objects.get_or_create(name='Default', quantity_measure='Piece', slug='default').id
+
+
+class Product(models.Model):
+    category = models.ForeignKey(ProductCategory, related_name='products', on_delete=models.SET(get_product_default_category))
+    name = models.CharField(max_length=63)
+    price = models.DecimalField(decimal_places=2, max_digits=12, default=0)
+    remaining_quantity = models.DecimalField(decimal_places=2, max_digits=12, default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Member, related_name='created_products', on_delete=models.SET(get_super_user), default=get_super_user)
+
+    def __str__(self):
+        return '%s: %s' % (self.category, self.name)
+
+
+class ProductTrade(models.Model):
+    product = models.ForeignKey(Product, related_name='trades', on_delete=models.CASCADE)
+    tradePrice = models.DecimalField(decimal_places=2, max_digits=12, default=0)
+    sold_product_quantity = models.DecimalField(decimal_places=2, max_digits=12, default=0)
+    dateTime = models.DateTimeField()
+    created_by = models.ForeignKey(Member, related_name='created_product_trades', on_delete=models.SET(get_super_user), default=get_super_user)
+
+    def __str__(self):
+        return '{product} dan {quantity}'.format(product=self.product, quantity=self.sold_product_quantity)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        try:
+            if self.product.remaining_quantity < self.sold_product_quantity:
+                return
+
+            self.tradePrice = self.product.price * self.sold_product_quantity
+            self.product.remaining_quantity -= self.sold_product_quantity
+            self.product.save()
+
+        except ObjectDoesNotExist:
+            self.tradePrice = 0
+
+        except MultipleObjectsReturned:
+            self.tradePrice = 0
+        super(ProductTrade, self).save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        self.product.remaining_quantity += self.sold_product_quantity
+        self.product.save()
+        super(ProductTrade, self).delete(using, keep_parents)
+
+
+class ProductCheckIn(models.Model):
+    product = models.ForeignKey(Product, related_name='checkins', on_delete=models.CASCADE)
+    checkin_product_quantity = models.DecimalField(decimal_places=2, max_digits=12, default=0)
+    date = models.DateField()
+    created_by = models.ForeignKey(Member, related_name='created_product_checkins', on_delete=models.SET(get_super_user), default=get_super_user)
+
+    def __str__(self):
+        return '{product} dan {quantity}'.format(product=self.product, quantity=self.checkin_product_quantity)
+
+    @property
+    def cost(self):
+        if self.checkin_product_quantity > 0:
+            return round(self.product.price * self.checkin_product_quantity, 2)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.product.remaining_quantity += self.checkin_product_quantity
+        self.product.save()
+        super(ProductCheckIn, self).save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        self.product.remaining_quantity -= self.checkin_product_quantity
+        self.product.save()
+        super(ProductCheckIn, self).delete(using, keep_parents)

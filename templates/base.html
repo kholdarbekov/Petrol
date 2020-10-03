@@ -28,7 +28,7 @@
         </div>
         <div class="sidebar-body">
             <ul class="nav">
-                {% if user.is_manager or user.is_general_staff %}
+                {% if user.is_manager %}
                     <li class="nav-item nav-category">Dashboards</li>
                     <li class="nav-item">
                         <a href="{% url 'index' %}" class="nav-link">
@@ -46,7 +46,7 @@
 
                 <li class="nav-item nav-category">Management</li>
 
-                {% if user.is_manager or user.is_general_staff or user.is_oil_staff %}
+                {% if user.is_manager %}
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="collapse" href="#oilChange" role="button" aria-expanded="false"
                            aria-controls="forms">
@@ -62,6 +62,24 @@
                                 <li class="nav-item">
                                     <a href="{% url 'oils_checkins' %}" class="nav-link">Yog' Kelishi</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'oils_trades' %}" class="nav-link">Yog' Savdosi</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                {% endif %}
+
+                {% if user.is_oil_staff or user.is_general_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="collapse" href="#oilChange" role="button" aria-expanded="false"
+                           aria-controls="forms">
+                            <i class="link-icon" data-feather="server"></i>
+                            <span class="link-title">Yog' Almashtirish</span>
+                            <i class="link-arrow" data-feather="chevron-down"></i>
+                        </a>
+                        <div class="collapse" id="oilChange">
+                            <ul class="nav sub-menu">
                                 <li class="nav-item">
                                     <a href="{% url 'oils_trades' %}" class="nav-link">Yog' Savdosi</a>
                                 </li>
@@ -91,6 +109,32 @@
                     </li>
                 {% endif %}
 
+                {% if user.is_manager %}
+                    <li class="nav-item nav-category">Products</li>
+                    {% for category in product_categories %}
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="collapse" href="#{{ category }}" role="button" aria-expanded="false"
+                               aria-controls="forms">
+                                <i class="link-icon" data-feather="folder"></i>
+                                <span class="link-title">{{ category }}</span>
+                                <i class="link-arrow" data-feather="chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="{{ category }}">
+                                <ul class="nav sub-menu">
+                                    <li class="nav-item">
+                                        <a href="{% url 'products_list' category.slug %}" class="nav-link">{{ category }} Ro'yxati</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{% url 'products_checkins' category.slug %}" class="nav-link">{{ category }} Kelishi</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{% url 'products_trades' category.slug %}" class="nav-link">{{ category }} Savdosi</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                     {% endfor %}
+                 {% endif %}
                 <li class="nav-item nav-category">Docs</li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
@@ -337,15 +381,9 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="#" class="nav-link">
+                                        <a href="{% url 'admin:password_change' %}" class="nav-link">
                                             <i data-feather="edit"></i>
-                                            <span>Edit Profile</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <i data-feather="repeat"></i>
-                                            <span>Switch User</span>
+                                            <span>Change Password</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">

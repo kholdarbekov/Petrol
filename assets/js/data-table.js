@@ -57,14 +57,27 @@ $(function() {
           e.preventDefault(); // cancel the link itself
           var tbRow = this.parentElement.parentElement;
           var frm = $('#signupForm');
+          let form_name = frm[0].getAttribute('name');
 
-          frm[0].name.value = tbRow.children[0].textContent;
-          frm[0].RemainingLitres.value = parseFloat(tbRow.children[1].textContent.replace(',', ''));
-          frm[0].bottleVolume.value = parseFloat(tbRow.children[3].textContent.replace(',', ''));
-          frm[0].price.value = parseFloat(tbRow.children[5].textContent.replace(',', ''));
-          frm[0].RemainingBottles.value = parseInt(tbRow.children[6].textContent.replace(',', ''));
-          frm[0].color.value = tbRow.children[7].textContent;
-          frm[0].oldName.value = tbRow.children[0].textContent;
+          if (form_name){
+            switch (form_name) {
+              case 'productList':
+                frm[0].name.value = tbRow.children[0].textContent;
+                frm[0].pk.value = this.title;
+                frm[0].remaining_quantity.value = parseFloat(tbRow.children[1].textContent.replace(',', ''));
+                frm[0].price.value = parseFloat(tbRow.children[2].textContent.replace(',', ''));
+                break;
+              case 'oilsList':
+                frm[0].name.value = tbRow.children[0].textContent;
+                frm[0].oldName.value = tbRow.children[0].textContent;
+                frm[0].RemainingLitres.value = parseFloat(tbRow.children[1].textContent.replace(',', ''));
+                frm[0].bottleVolume.value = parseFloat(tbRow.children[3].textContent.replace(',', ''));
+                frm[0].RemainingBottles.value = parseInt(tbRow.children[5].textContent.replace(',', ''));
+                frm[0].price.value = parseFloat(tbRow.children[6].textContent.replace(',', ''));
+                frm[0].color.value = tbRow.children[7].textContent;
+                break;
+            }
+          }
 
           frm[0].action = 'update/';
         });

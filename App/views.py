@@ -9,22 +9,43 @@ from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.conf import settings
 
-from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol, Member
-from .forms import OilTradeForm, TradeForm
+from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol, Member, ProductCategory, Product, ProductTrade, ProductCheckIn
+from .forms import OilTradeForm, TradeForm, ProductCheckInForm, ProductTradeForm
+
+
+class ConfiguredListView(ListView):
+    def __init__(self):
+        self.member = None
+        super(ConfiguredListView, self).__init__()
+
+    def setup(self, request, *args, **kwargs):
+        super(ConfiguredListView, self).setup(request, *args, **kwargs)
+        self.member = Member.objects.get(username=self.request.user.username)
+
+    # set user and product_categories to context
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(ConfiguredListView, self).get_context_data(**kwargs)
+        context['user'] = self.member
+        context['product_categories'] = ProductCategory.objects.exclude(slug='default')
+
+        return context
 
 
 class IndexView(TemplateView):
     template_name = 'index.html'
-    oils_list_page = reverse_lazy('oils_list')
+    oil_trades_page = reverse_lazy('oils_trades')
     petrol_cars_list_page = reverse_lazy('cars_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
-        elif member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        if not member.is_manager:  # if member is STAFF
+            if member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if member.is_oil_staff:
+                return redirect(self.oil_trades_page)
 
         return super().dispatch(*args, **kwargs)
 
@@ -61,6 +82,8 @@ class IndexView(TemplateView):
 
         context['totalRemaining'] = 0
 
+        context['totalRemainingPrice'] = 0
+
         context['totalSold'] = 0
 
         for o in Oil.objects.all():
@@ -70,6 +93,8 @@ class IndexView(TemplateView):
             context['oils'][o.name] = o
 
             context['totalRemaining'] += o.RemainingLitres
+
+            context['totalRemainingPrice'] += o.RemainingLitres * o.price
 
         i = 0
         lastDateTime = ''
@@ -86,27 +111,28 @@ class IndexView(TemplateView):
         for c in OilCheckIn.objects.filter(date__range=last_year_range).order_by('-date'):
             context['oilCheckIns'][c.id] = c
 
+        context['product_categories'] = ProductCategory.objects.exclude(slug='default')
+
         return context
 
 
-class OilsListView(ListView):
+class OilsListView(ConfiguredListView):
     model = Oil
     context_object_name = 'oils'
     template_name = 'oilsList.html'
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super(OilsListView, self).get_context_data(**kwargs)
-        context['user'] = Member.objects.get(username=self.request.user.username)
-
-        return context
 
 
 class OilCreateView(CreateView):
@@ -114,12 +140,18 @@ class OilCreateView(CreateView):
     fields = ['name', 'price', 'RemainingLitres', 'RemainingBottles', 'bottleVolume', 'color']
     success_url = reverse_lazy('oils_list')
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -129,7 +161,7 @@ class OilCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # form.instance.created_by = self.request.user
+        form.instance.created_by = self.member
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -141,12 +173,18 @@ class OilDeleteView(DeleteView):
     success_url = reverse_lazy('oils_list')
     http_method_names = ['post', ]
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -170,12 +208,18 @@ class OilUpdateView(UpdateView):
     fields = ['name', 'price', 'RemainingLitres', 'RemainingBottles', 'bottleVolume', 'color']
     success_url = reverse_lazy('oils_list')
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -189,22 +233,26 @@ class OilUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class OilCheckInsListView(ListView):
+class OilCheckInsListView(ConfiguredListView):
     model = OilCheckIn
     context_object_name = 'oilCheckIns'
     template_name = 'oilCheckIns.html'
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = Member.objects.get(username=self.request.user.username)
         context['oils'] = Oil.objects.all()
         return context
 
@@ -215,12 +263,18 @@ class OilCheckinCreateView(CreateView):
     success_url = reverse_lazy('oils_checkins')
     template_name = 'oilCheckIns.html'
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -230,7 +284,7 @@ class OilCheckinCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # form.instance.created_by = self.request.user
+        form.instance.created_by = self.member
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -242,12 +296,18 @@ class OilCheckinDeleteView(DeleteView):
     success_url = reverse_lazy('oils_checkins')
     http_method_names = ['post', ]
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -266,7 +326,7 @@ class OilCheckinDeleteView(DeleteView):
         return HttpResponse(success_url)
 
 
-class OilTradesListView(ListView):
+class OilTradesListView(ConfiguredListView):
     model = OilTrade
     context_object_name = 'oilTrades'
     template_name = 'oilsTrades.html'
@@ -274,14 +334,12 @@ class OilTradesListView(ListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
+        if self.member.is_petrol_staff:
             return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = Member.objects.get(username=self.request.user.username)
         context['oils'] = Oil.objects.all()
         return context
 
@@ -296,8 +354,8 @@ class OilTradeCreateView(CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
+        self.member = Member.objects.get(username=self.request.user.username)
+        if self.member.is_petrol_staff:
             return redirect(self.petrol_cars_list_page)
         return super().dispatch(*args, **kwargs)
 
@@ -308,6 +366,7 @@ class OilTradeCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
+        form.instance.created_by = self.member
         trade = form.instance
         if trade.oil.RemainingLitres < trade.litreSold:
             return redirect(self.success_url, form=form)
@@ -323,12 +382,18 @@ class OilTradeDeleteView(DeleteView):
     success_url = reverse_lazy('oils_trades')
     http_method_names = ['post', ]
     petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_petrol_staff:
-            return redirect(self.petrol_cars_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -347,22 +412,21 @@ class OilTradeDeleteView(DeleteView):
         return HttpResponse(success_url)
 
 
-class CarsListView(ListView):
+class CarsListView(ConfiguredListView):
     model = Car
     context_object_name = 'cars'
     template_name = 'carsList.html'
-    oils_list_page = reverse_lazy('oils_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = Member.objects.get(username=self.request.user.username)
         context['carModels'] = CarModel.objects.all()
         context['bonus_limit'] = settings.PETROL_BONUS_LIMIT
         return context
@@ -373,13 +437,14 @@ class CarCreateView(CreateView):
     fields = ['carNumber', 'model']
     success_url = reverse_lazy('cars_list')
     template_name = 'carsList.html'
-    oils_list_page = reverse_lazy('oils_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -389,7 +454,7 @@ class CarCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # form.instance.created_by = self.request.user
+        form.instance.created_by = self.member
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -400,13 +465,19 @@ class CarDeleteView(DeleteView):
     model = Car
     success_url = reverse_lazy('cars_list')
     http_method_names = ['post', ]
-    oils_list_page = reverse_lazy('oils_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+    petrol_cars_list_page = reverse_lazy('cars_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -430,13 +501,19 @@ class CarBonusUpdateView(UpdateView):
     fields = ['carNumber']
     success_url = reverse_lazy('cars_list')
     template_name = 'carsList.html'
-    oils_list_page = reverse_lazy('oils_list')
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -455,22 +532,21 @@ class CarBonusUpdateView(UpdateView):
         return super().form_invalid(form)
 
 
-class TradesListView(ListView):
+class TradesListView(ConfiguredListView):
     model = Trade
     context_object_name = 'trades'
     template_name = 'petrolTrades.html'
-    oils_list_page = reverse_lazy('oils_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = Member.objects.get(username=self.request.user.username)
         context['petrol_list'] = Petrol.objects.all()
         context['cars'] = Car.objects.all()
         context['bonus_limit'] = settings.PETROL_BONUS_LIMIT
@@ -482,13 +558,14 @@ class TradeCreateView(CreateView):
     success_url = reverse_lazy('trades_list')
     template_name = 'petrolTrades.html'
     form_class = TradeForm
-    oils_list_page = reverse_lazy('oils_list')
+    oil_trades_page = reverse_lazy('oils_trades')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -498,6 +575,7 @@ class TradeCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
+        form.instance.created_by = self.member
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -508,13 +586,19 @@ class TradeDeleteView(DeleteView):
     model = Trade
     success_url = reverse_lazy('trades_list')
     http_method_names = ['post', ]
-    oils_list_page = reverse_lazy('oils_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+    petrol_cars_list_page = reverse_lazy('cars_list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        member = Member.objects.get(username=self.request.user.username)
-        if member.is_oil_staff:
-            return redirect(self.oils_list_page)
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -525,6 +609,342 @@ class TradeDeleteView(DeleteView):
 
     def get_object(self, queryset=None):
         return get_object_or_404(Trade, pk=self.request.POST['pk'])
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponse(success_url)
+
+
+class ProductsListView(ConfiguredListView):
+    model = Product
+    context_object_name = 'products'
+    template_name = 'productsList.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return Product.objects.filter(category__slug=self.kwargs['slug'])
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(ProductsListView, self).get_context_data(**kwargs)
+        context['product_category'] = ProductCategory.objects.get(slug=self.kwargs['slug'])
+        return context
+
+
+class ProductCreateView(CreateView):
+    model = Product
+    fields = ['name', 'price', 'remaining_quantity']
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('products_list', kwargs=self.kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.category = ProductCategory.objects.get(slug=self.kwargs['slug'])
+        form.instance.created_by = self.member
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    http_method_names = ['post', ]
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('products_list', kwargs=self.kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Product, pk=self.request.POST['pk'])
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponse(success_url)
+
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    fields = ['name', 'price', 'remaining_quantity']
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('products_list', kwargs=self.kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Product, pk=self.request.POST['pk'])
+
+    def form_valid(self, form):
+        # form.instance.created_by = self.member
+        return super().form_valid(form)
+
+
+class ProductCheckInsListView(ConfiguredListView):
+    model = ProductCheckIn
+    context_object_name = 'productCheckIns'
+    template_name = 'productCheckIns.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return ProductCheckIn.objects.filter(product__category__slug=self.kwargs['slug'])
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['products'] = Product.objects.filter(category__slug=self.kwargs['slug'])
+        context['product_category'] = ProductCategory.objects.get(slug=self.kwargs['slug'])
+        return context
+
+
+class ProductCheckinCreateView(CreateView):
+    model = ProductCheckIn
+    # fields = ['checkin_product_quantity', 'date']
+    template_name = 'productCheckIns.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+    form_class = ProductCheckInForm
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('products_checkins', kwargs=self.kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.created_by = self.member
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+
+
+class ProductCheckinDeleteView(DeleteView):
+    model = ProductCheckIn
+    http_method_names = ['post', ]
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('products_checkins', kwargs=self.kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(ProductCheckIn, pk=self.request.POST['pk'])
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponse(success_url)
+
+
+class ProductTradesListView(ConfiguredListView):
+    model = ProductTrade
+    context_object_name = 'productTrades'
+    template_name = 'productTrades.html'
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return ProductTrade.objects.filter(product__category__slug=self.kwargs['slug'])
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['products'] = Product.objects.filter(category__slug=self.kwargs['slug'])
+        context['product_category'] = ProductCategory.objects.get(slug=self.kwargs['slug'])
+        return context
+
+
+class ProductTradeCreateView(CreateView):
+    model = ProductTrade
+    # fields = ['product', 'tradePrice', 'sold_product_quantity', 'dateTime']
+    template_name = 'productTrades.html'
+    form_class = ProductTradeForm
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('products_trades', kwargs=self.kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.created_by = self.member
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+
+
+class ProductTradeDeleteView(DeleteView):
+    model = ProductTrade
+    http_method_names = ['post', ]
+    petrol_cars_list_page = reverse_lazy('cars_list')
+    oil_trades_page = reverse_lazy('oils_trades')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        self.member = Member.objects.get(username=self.request.user.username)
+        if not self.member.is_manager:  # if member is STAFF
+            if self.member.is_general_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_petrol_staff:
+                return redirect(self.petrol_cars_list_page)
+            if self.member.is_oil_staff:
+                return redirect(self.oil_trades_page)
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('products_trades', kwargs=self.kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(ProductTrade, pk=self.request.POST['pk'])
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()

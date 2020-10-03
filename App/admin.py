@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CarModel, Car, Petrol, Trade, Oil, OilTrade, OilCheckIn, Config
+from .models import CarModel, Car, Petrol, Trade, Oil, OilTrade, OilCheckIn, Config, ProductCategory, Product, ProductTrade, ProductCheckIn
 from .forms import OilForm
 
 
@@ -88,6 +88,47 @@ class OilCheckInAdmin(admin.ModelAdmin):
         super(OilCheckInAdmin, self).delete_queryset(request, queryset)
 
 
+class ProductCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'quantity_measure']
+    prepopulated_fields = {'slug': ('name',)}
+
+
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['name', 'remaining_quantity', 'category', 'price', 'created_by']
+    list_per_page = 30
+    search_fields = ['name']
+    list_filter = ['category__name']
+    date_hierarchy = 'created'
+
+
+class ProductTradeAdmin(admin.ModelAdmin):
+    list_display = ['product', 'sold_product_quantity', 'tradePrice', 'dateTime']
+    list_per_page = 30
+    search_fields = ['product__name', 'product__category__name']
+    list_filter = ['product__name', 'product__category__name']
+    date_hierarchy = 'dateTime'
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.product.remaining_quantity += obj.sold_product_quantity
+            obj.product.save()
+        super(ProductTradeAdmin, self).delete_queryset(request, queryset)
+
+
+class ProductCheckInAdmin(admin.ModelAdmin):
+    list_display = ['product', 'checkin_product_quantity']
+    list_per_page = 30
+    search_fields = ['product__name']
+    list_filter = ['product__name', 'product__category__name']
+    date_hierarchy = 'date'
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.product.remaining_quantity -= obj.checkin_product_quantity
+            obj.product.save()
+        super(ProductCheckInAdmin, self).delete_queryset(request, queryset)
+
+
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(CarModel, CarModelAdmin)
 admin.site.register(Car, CarAdmin)
@@ -96,3 +137,7 @@ admin.site.register(Trade, TradeAdmin)
 admin.site.register(Oil, OilAdmin)
 admin.site.register(OilTrade, OilTradeAdmin)
 admin.site.register(OilCheckIn, OilCheckInAdmin)
+admin.site.register(ProductCategory, ProductCategoryAdmin)
+admin.site.register(Product, ProductAdmin)
+admin.site.register(ProductTrade, ProductTradeAdmin)
+admin.site.register(ProductCheckIn, ProductCheckInAdmin)

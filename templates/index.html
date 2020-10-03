@@ -166,7 +166,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-baseline mb-2">
-                            <h6 class="card-title mb-0">Umumiy Qolgan Yog'</h6>
+                            <h6 class="card-title mb-0">Umumiy Qolgan Yog' (Narxi: {{ totalRemainingPrice|floatformat:2 }} UZS)</h6>
                             <div class="dropdown mb-2">
                                 <button class="btn p-0" type="button" id="dropdownMenuButton5" data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
@@ -215,7 +215,7 @@
         </div> <!-- row -->
 
         <div class="row">
-            <div class="col-lg-6 col-xl-6 grid-margin grid-margin-xl-0 stretch-card">
+            <div class="col-lg-7 col-xl-7 grid-margin grid-margin-xl-0 stretch-card">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-baseline mb-2">
@@ -250,6 +250,7 @@
                                     <th>Yog'</th>
                                     <th>Qolgan</th>
                                     <th>1L narxi</th>
+                                    <th>1 Idish narxi</th>
                                     <th>Oxirgi Kelgan</th>
                                 </tr>
                                 </thead>
@@ -274,7 +275,10 @@
                                             {% endwith %}
                                         </td>
                                         <td>
-                                            {{ oil.price }}
+                                            {{ oil.price }} UZS
+                                        </td>
+                                        <td>
+                                            {{ oil.price|multiply:oil.bottleVolume|floatformat:2 }} UZS
                                         </td>
                                         <td>
                                             {{ oil|last_checkin }}
@@ -287,7 +291,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6 col-xl-6 stretch-card">
+            <div class="col-lg-5 col-xl-5 stretch-card">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-baseline mb-2">
@@ -324,7 +328,6 @@
                                     <th class="pt-0">Kelgan Vaqti</th>
                                     <th class="pt-0">Idish soni</th>
                                     <th class="pt-0">Status</th>
-                                    <th class="pt-0">Assign</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -343,7 +346,6 @@
                                         <td>{{ c.date|date:"d/m/Y" }}</td>
                                         <td>{{ c.bottles }}</td>
                                         <td><span class="badge badge-success">Review</span></td>
-                                        <td>Leonardo Payne</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -598,7 +600,7 @@
                                     fontColor: '#8392a5',
                                     fontSize: 10,
                                     min: minSale*0.6 - (minSale*0.6)%100000,
-                                    max: maxSale*1.3 - (maxSale*1.3)%100000,
+                                    max: (maxSale*1.3 - (maxSale*1.3)%100000) < maxSale ? maxSale*1.6 - (maxSale*1.6)%100000 : maxSale*1.3 - (maxSale*1.3)%100000,
                                     maxTicksLimit: 9
                                 }
                             }]

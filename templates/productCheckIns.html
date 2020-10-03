@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static app_extras %}
 
-{% block title %}Oil Check Ins{% endblock %}
+{% block title %}Product Check Ins{% endblock %}
 
 {% block css_block %}
 	<!-- plugin css for this page -->
@@ -21,8 +21,8 @@
 
 				<nav class="page-breadcrumb">
 					<ol class="breadcrumb">
-						<li class="breadcrumb-item"><a href="#">Oil Change</a></li>
-						<li class="breadcrumb-item active" aria-current="page">Oil Check Ins</li>
+						<li class="breadcrumb-item"><a href="#">Products</a></li>
+						<li class="breadcrumb-item active" aria-current="page">{{ product_category }}</li>
 					</ol>
 				</nav>
 
@@ -30,23 +30,23 @@
 					<div class="col-md-12 grid-margin">
 						<div class="card">
 							<div class="card-body">
-								<h6 class="card-title">Yog' Kelishini Kirgizish</h6>
-									<form action="{% url 'oil_checkin_add' %}" method="post">
+								<h6 class="card-title">{{ product_category }} Kelishini Kirgizish</h6>
+									<form action="{% url 'product_checkin_add' product_category.slug %}" method="post">
                                         {% csrf_token %}
                                         {{ form.non_field_errors }}
 										<div class="row">
                                             <div class="col-sm-8">
                                                 <div class="form-group">
-                                                    <label>Yog'</label>
+                                                    <label>{{ product_category }}</label>
                                                     <div id="the-basics">
-                                                        <input value="{{ form|get_item:'oil' }}" name="oil" class="typeahead" type="text" placeholder="Yog' Nomi">
+                                                        <input value="{{ form|get_item:'oil' }}" name="product" class="typeahead" type="text" placeholder="{{ product_category }} Nomi">
                                                     </div>
                                                 </div>
                                             </div><!-- Col -->
                                             <div class="col-sm-4">
 												<div class="form-group">
-													<label class="control-label">Idish soni</label>
-													<input value="{{ form|get_item:'bottles' }}" name="bottles" required="required" type="number" class="form-control" placeholder="Idish sonini kirgizing">
+													<label class="control-label">Nechchi {{ product_category.quantity_measure }} Kelgan</label>
+													<input value="{{ form|get_item:'bottles' }}" name="checkin_product_quantity" type="number" required="required" class="form-control" placeholder="{{ product_category.quantity_measure }}da Kirgizing">
 												</div>
 											</div><!-- Col -->
 										</div><!-- Row -->
@@ -71,14 +71,13 @@
 					<div class="col-md-12 grid-margin stretch-card">
                         <div class="card">
                           <div class="card-body">
-                            <h6 class="card-title">Yog' Kelganlari Ro'yxati</h6>
+                            <h6 class="card-title">{{ product_category }} Kelganlari Ro'yxati</h6>
                             <div class="table-responsive">
                               <table id="dataTableExample" class="table">
                                 <thead>
                                   <tr>
-                                    <th>Yog' Nomi</th>
-                                    <th>Idish soni</th>
-                                    <th>Idish hajmi</th>
+                                    <th>{{ product_category }} Nomi</th>
+                                    <th>Qancha Kelgan</th>
                                     <th>Vaqti</th>
                                     <th>Summasi</th>
                                     <th>Kirgizgan</th>
@@ -86,16 +85,15 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {% for checkin in oilCheckIns %}
+                                  {% for checkin in productCheckIns %}
                                       <tr>
-                                        <td>{{ checkin.oil }}</td>
-                                        <td>{{ checkin.bottles }}</td>
-                                        <td>{{ checkin.oil.bottleVolume|floatformat:1 }} L</td>
+                                        <td>{{ checkin.product.name }}</td>
+                                        <td>{{ checkin.checkin_product_quantity }} {{ product_category.quantity_measure }}</td>
                                         <td>{{ checkin.date|date:"d/m/Y" }}</td>
-                                        <td>{{ checkin|checkin_cost }} UZS</td>
+                                        <td>{{ checkin.cost }} UZS</td>
                                         <td>{{ checkin.created_by }}</td>
                                         {% if user.is_manager %}
-                                        <td><a href="{% url 'oil_checkin_delete' %}" title="{{ checkin.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
+                                        <td><a href="{% url 'product_checkin_delete' product_category.slug %}" title="{{ checkin.pk }}" id="Delete{{ forloop.counter }}" class="editor_remove">Delete</a></td>
                                         {% endif %}
                                       </tr>
                                   {% endfor %}
@@ -158,9 +156,9 @@
           cb(matches);
         };
       };
-      var oils = [
-          {% for oil in oils %}
-              "{{ oil.name }}"
+      var products = [
+          {% for product in products %}
+              "{{ product.name }}"
               {% if not forloop.last %},{% endif %}
           {% endfor %}
       ];
@@ -170,8 +168,8 @@
         highlight: true,
         minLength: 1
       }, {
-        name: 'oils',
-        source: substringMatcher(oils)
+        name: 'products',
+        source: substringMatcher(products)
       });
     </script>
 	<!-- end custom js for this page -->
