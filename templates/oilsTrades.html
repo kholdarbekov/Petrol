@@ -41,14 +41,14 @@
                                     <div class="form-group">
                                         <label>Yog'</label>
                                         <div id="the-basics">
-                                            <input value="{{ form|get_item:'oil' }}" name="oil" required="required" class="typeahead" type="text" placeholder="Yog' Nomi">
+                                            <input name="oil" required="required" class="typeahead" type="text" placeholder="Yog' Nomi">
                                         </div>
                                     </div>
                                 </div><!-- Col -->
                                 <div class="col-sm-5">
                                     <div class="form-group">
                                         <label class="control-label">Litr Sotildi</label>
-                                        <input name="litreSold" required="required" type="number" class="form-control" placeholder="Enter in Integers">
+                                        <input name="litreSold" required="required" type="number" min="0" max="10" class="form-control" placeholder="Enter in Integers">
                                     </div>
                                 </div><!-- Col -->
                             </div><!-- Row -->
@@ -73,6 +73,9 @@
                                     </div>
                                 </div>
                             </div><!-- Row -->
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
                             <button type="submit" class="btn btn-primary submit">Submit form</button>
                         </form>
                     </div>

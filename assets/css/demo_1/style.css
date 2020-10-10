@@ -25189,4 +25189,6 @@ div.tagsinput {
 .rtl .wizard > .actions > ul > li {
   float: right; }
 
-/*# sourceMappingURL=../maps/demo_1/style.css.map */
+.errorlist{
+  color: red;
+}

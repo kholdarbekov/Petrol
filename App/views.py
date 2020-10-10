@@ -1,4 +1,5 @@
-from django.http import HttpResponse
+from django.contrib import messages
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -367,14 +368,13 @@ class OilTradeCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.created_by = self.member
-        trade = form.instance
-        if trade.oil.RemainingLitres < trade.litreSold:
-            return redirect(self.success_url, form=form)
-
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        return super().form_invalid(form)
+        for field, error in form.errors.items():
+            messages.error(self.request, error)
+
+        return redirect(self.success_url)
 
 
 class OilTradeDeleteView(DeleteView):
@@ -882,7 +882,7 @@ class ProductTradesListView(ConfiguredListView):
 class ProductTradeCreateView(CreateView):
     model = ProductTrade
     # fields = ['product', 'tradePrice', 'sold_product_quantity', 'dateTime']
-    template_name = 'productTrades.html'
+    # template_name = 'productTrades.html'
     form_class = ProductTradeForm
     petrol_cars_list_page = reverse_lazy('cars_list')
     oil_trades_page = reverse_lazy('oils_trades')
@@ -913,7 +913,11 @@ class ProductTradeCreateView(CreateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        return super().form_invalid(form)
+        if form.errors:
+            messages.error(self.request, form.errors['sold_product_quantity'])
+
+        return redirect(self.get_success_url())
+        # return super().form_invalid(form)
 
 
 class ProductTradeDeleteView(DeleteView):
