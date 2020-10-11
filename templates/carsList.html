@@ -25,39 +25,40 @@
                 <li class="breadcrumb-item active" aria-current="page">List Of Cars</li>
             </ol>
         </nav>
-        {% if user.is_authenticated %}
-            <div class="row">
-                <div class="col-md-12 grid-margin">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title">Yangi Mashina Qo'shish</h6>
-                            <form action="{% url 'car_add' %}" method="post" id="signupForm">
-                                {% csrf_token %}
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label class="control-label">Mashina Raqami</label>
-                                            <input class="form-control" data-inputmask-alias="99-*99*aa" data-inputmask="'casing':'upper', 'autoUnmask': true, 'removeMaskOnSubmit': true" name="carNumber"
-                                                   type="text" placeholder="Car Numer">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Yangi Mashina Qo'shish</h6>
+                        <form action="{% url 'car_add' %}" method="post" id="signupForm">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Mashina Raqami</label>
+                                        <input class="form-control" data-inputmask-alias="99-*99*aa" data-inputmask="'casing':'upper', 'autoUnmask': true, 'removeMaskOnSubmit': true" name="carNumber"
+                                               type="text" placeholder="Car Numer" required="required">
+                                    </div>
+                                </div><!-- Col -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Model</label>
+                                        <div id="the-basics">
+                                            <input value="" name="model" required="required" class="typeahead" type="text" placeholder="Model Name">
                                         </div>
-                                    </div><!-- Col -->
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label>Model</label>
-                                            <div id="the-basics">
-                                                <input value="{{ form|get_item:'model' }}" name="model" required="required" class="typeahead" type="text" placeholder="Model Name">
-                                            </div>
-                                        </div>
-                                    </div><!-- Col -->
-                                </div><!-- Row -->
-                                <button type="submit" class="btn btn-primary submit">Submit form</button>
-                            </form>
-                        </div>
+                                    </div>
+                                </div><!-- Col -->
+                            </div><!-- Row -->
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary submit">Registratsiya</button>
+                        </form>
                     </div>
                 </div>
             </div>
-        {% endif %}
-
+        </div>
+        {% if user.is_manager or user.is_petrol_staff %}
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
@@ -100,7 +101,7 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
     </div>
 {% endblock %}
 

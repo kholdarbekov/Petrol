@@ -25192,3 +25192,7 @@ div.tagsinput {
 .errorlist{
   color: red;
 }
+
+.successlist{
+  color: green;
+}

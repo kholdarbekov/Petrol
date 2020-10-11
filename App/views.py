@@ -1,5 +1,6 @@
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -9,9 +10,10 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.conf import settings
+from django.forms.utils import ErrorList
 
 from .models import OilTrade, OilCheckIn, Oil, Car, Trade, CarModel, Petrol, Member, ProductCategory, Product, ProductTrade, ProductCheckIn
-from .forms import OilTradeForm, TradeForm, ProductCheckInForm, ProductTradeForm
+from .forms import OilTradeForm, TradeForm, ProductCheckInForm, ProductTradeForm, CarForm, SuccessList
 
 
 class ConfiguredListView(ListView):
@@ -21,7 +23,10 @@ class ConfiguredListView(ListView):
 
     def setup(self, request, *args, **kwargs):
         super(ConfiguredListView, self).setup(request, *args, **kwargs)
-        self.member = Member.objects.get(username=self.request.user.username)
+        try:
+            self.member = Member.objects.get(username=self.request.user.username)
+        except ObjectDoesNotExist:
+            self.member = request.user
 
     # set user and product_categories to context
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -418,11 +423,10 @@ class CarsListView(ConfiguredListView):
     template_name = 'carsList.html'
     oil_trades_page = reverse_lazy('oils_trades')
 
-    @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        if not self.member.is_manager:  # if member is STAFF
-            if self.member.is_oil_staff:
-                return redirect(self.oil_trades_page)
+        # if not self.member.is_manager:  # if member is STAFF
+        #     if self.member.is_oil_staff:
+        #         return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -432,19 +436,26 @@ class CarsListView(ConfiguredListView):
         return context
 
 
+def get_default_member():
+    return Member.objects.get_or_create(username='default')[0]
+
+
 class CarCreateView(CreateView):
     model = Car
-    fields = ['carNumber', 'model']
+    # ields = ['carNumber', 'model']
     success_url = reverse_lazy('cars_list')
     template_name = 'carsList.html'
     oil_trades_page = reverse_lazy('oils_trades')
+    form_class = CarForm
 
-    @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        self.member = Member.objects.get(username=self.request.user.username)
-        if not self.member.is_manager:  # if member is STAFF
-            if self.member.is_oil_staff:
-                return redirect(self.oil_trades_page)
+        try:
+            self.member = Member.objects.get(username=self.request.user.username)
+        except ObjectDoesNotExist:
+            self.member = get_default_member()
+        # if not self.member.is_manager:  # if member is STAFF
+        #     if self.member.is_oil_staff:
+        #         return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -455,10 +466,29 @@ class CarCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.created_by = self.member
+
+        if self.request.session.get('car_create_count', False):
+            self.request.session['car_create_count'] += 1
+        else:
+            self.request.session['car_create_count'] = 1
+            self.request.session.set_expiry(86400)  # 1 day
+
+        if self.request.session.get('car_create_count', 1) > settings.PETROL_DAILY_CAR_CREATE_LIMIT:
+            car_create_limit_error = ErrorList()
+            car_create_limit_error.data.append('1 kunda maximum %d ta mashina registratsiya qila olasiz' % settings.PETROL_DAILY_CAR_CREATE_LIMIT)
+            messages.error(self.request, car_create_limit_error)
+            return redirect(self.success_url)
+        else:
+            success_message = SuccessList()
+            success_message.data.append(form.instance.carNumber + ' Registratsiyadan o\'tkazildi')
+            messages.success(self.request, success_message)
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        return super().form_invalid(form)
+        for field, error in form.errors.items():
+            messages.error(self.request, error)
+
+        return redirect(self.success_url)
 
 
 class CarDeleteView(DeleteView):
@@ -579,7 +609,10 @@ class TradeCreateView(CreateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        return super().form_invalid(form)
+        for field, error in form.errors.items():
+            messages.error(self.request, error)
+
+        return redirect(self.success_url)
 
 
 class TradeDeleteView(DeleteView):
@@ -913,8 +946,8 @@ class ProductTradeCreateView(CreateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        if form.errors:
-            messages.error(self.request, form.errors['sold_product_quantity'])
+        for field, error in form.errors.items():
+            messages.error(self.request, error)
 
         return redirect(self.get_success_url())
         # return super().form_invalid(form)

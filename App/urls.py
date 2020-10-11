@@ -8,7 +8,7 @@ from .views import IndexView, OilsListView, OilCheckInsListView, OilCreateView, 
     ProductCheckinCreateView, ProductCheckinDeleteView, ProductTradesListView, ProductTradeCreateView, ProductTradeDeleteView
 
 urlpatterns = [
-    path(r'', IndexView.as_view(), name='index'),
+    path(r'dashboard/oil/', IndexView.as_view(), name='index'),
 
     path(r'oils/', OilsListView.as_view(), name='oils_list'),
     path(r'oils/add/', OilCreateView.as_view(), name='oil_add'),
@@ -23,7 +23,7 @@ urlpatterns = [
     path(r'oils/trades/add/', OilTradeCreateView.as_view(), name='oil_trades_add'),
     path(r'oils/trades/delete/', OilTradeDeleteView.as_view(), name='oil_trades_delete'),
 
-    path(r'petrol/cars/', CarsListView.as_view(), name='cars_list'),
+    path(r'', CarsListView.as_view(), name='cars_list'),
     path(r'petrol/cars/add/', CarCreateView.as_view(), name='car_add'),
     path(r'petrol/cars/delete/', CarDeleteView.as_view(), name='car_delete'),
     path(r'petrol/cars/bonus/', CarBonusUpdateView.as_view(), name='car_bonus'),

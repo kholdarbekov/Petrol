@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = 'o(6b-1!q)gw2zs@_37johff-x6e$9vj_kop%tr29-$#-i8iup0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -136,7 +136,8 @@ USE_THOUSAND_SEPARATOR = True
 
 LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = 'index'
-LOGOUT_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'cars_list'
 
 PETROL_BONUS_LIMIT = 500
 PRODUCTS_BONUS_LIMITS = {}
+PETROL_DAILY_CAR_CREATE_LIMIT = 3

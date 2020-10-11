@@ -81,6 +81,9 @@
                                     </div>
                                 </div>
                             </div><!-- Row -->
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
                             <button type="submit" class="btn btn-primary submit">Submit form</button>
                         </form>
                     </div>

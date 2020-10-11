@@ -9,7 +9,7 @@ admin.site.site_title = 'Petrol'
 
 
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ['petrol_bonus_limit']
+    list_display = ['petrol_bonus_limit', 'daily_car_create_limit']
 
 
 class CarModelAdmin(admin.ModelAdmin):
