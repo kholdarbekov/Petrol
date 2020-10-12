@@ -154,7 +154,29 @@
                             </div>
                         </li>
                      {% endfor %}
-                 {% endif %}
+                {% endif %}
+                {% if user.is_user_staff %}
+                    <li class="nav-item nav-category">Products</li>
+                    {% for category in product_categories %}
+                        {% if user in category.staffs.all %}
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="collapse" href="#{{ category }}" role="button" aria-expanded="false"
+                                   aria-controls="forms">
+                                    <i class="link-icon" data-feather="folder"></i>
+                                    <span class="link-title">{{ category }}</span>
+                                    <i class="link-arrow" data-feather="chevron-down"></i>
+                                </a>
+                                <div class="collapse" id="{{ category }}">
+                                    <ul class="nav sub-menu">
+                                        <li class="nav-item">
+                                            <a href="{% url 'products_trades' category.slug %}" class="nav-link">{{ category }} Savdosi</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endif %}
+                     {% endfor %}
+                {% endif %}
                 {% if user.is_authenticated %}
                     <li class="nav-item nav-category">Docs</li>
                     <li class="nav-item">

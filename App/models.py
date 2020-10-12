@@ -264,6 +264,7 @@ class ProductCategory(models.Model):
     slug = models.SlugField(null=False, unique=True)
     has_bonus = models.BooleanField(default=False)
     bonus_limit_quantity = models.DecimalField(decimal_places=2, max_digits=12, default=0)
+    staffs = models.ManyToManyField(Member, related_name='product_categories', blank=True, null=True)
 
     def __str__(self):
         return self.name

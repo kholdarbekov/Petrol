@@ -893,13 +893,15 @@ class ProductTradesListView(ConfiguredListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        self.product_category = ProductCategory.objects.get(slug=self.kwargs['slug'])
         if not self.member.is_manager:  # if member is STAFF
-            if self.member.is_general_staff:
-                return redirect(self.petrol_cars_list_page)
-            if self.member.is_petrol_staff:
-                return redirect(self.petrol_cars_list_page)
-            if self.member.is_oil_staff:
-                return redirect(self.oil_trades_page)
+            if self.member not in self.product_category.staffs.all():
+                if self.member.is_general_staff:
+                    return redirect(self.petrol_cars_list_page)
+                if self.member.is_petrol_staff:
+                    return redirect(self.petrol_cars_list_page)
+                if self.member.is_oil_staff:
+                    return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
@@ -922,14 +924,16 @@ class ProductTradeCreateView(CreateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        self.product_category = ProductCategory.objects.get(slug=self.kwargs['slug'])
         self.member = Member.objects.get(username=self.request.user.username)
         if not self.member.is_manager:  # if member is STAFF
-            if self.member.is_general_staff:
-                return redirect(self.petrol_cars_list_page)
-            if self.member.is_petrol_staff:
-                return redirect(self.petrol_cars_list_page)
-            if self.member.is_oil_staff:
-                return redirect(self.oil_trades_page)
+            if self.member not in self.product_category.staffs.all():
+                if self.member.is_general_staff:
+                    return redirect(self.petrol_cars_list_page)
+                if self.member.is_petrol_staff:
+                    return redirect(self.petrol_cars_list_page)
+                if self.member.is_oil_staff:
+                    return redirect(self.oil_trades_page)
         return super().dispatch(*args, **kwargs)
 
     def get_success_url(self):
