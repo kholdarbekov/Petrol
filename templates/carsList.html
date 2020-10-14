@@ -25,7 +25,8 @@
                 <li class="breadcrumb-item active" aria-current="page">List Of Cars</li>
             </ol>
         </nav>
-        <div class="row">
+        {% if user.is_authenticated %}
+            <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="card">
                     <div class="card-body">
@@ -50,7 +51,9 @@
                                 </div><!-- Col -->
                             </div><!-- Row -->
                             {% for message in messages %}
-                                {{ message }}
+                                {% if message.extra_tags == 'car_create' %}
+                                    {{ message }}
+                                {% endif %}
                             {% endfor %}
                             <button type="submit" class="btn btn-primary submit">Registratsiya</button>
                         </form>
@@ -58,6 +61,69 @@
                 </div>
             </div>
         </div>
+        {% else %}
+            <div class="row">
+                <div class="col-md-6 grid-margin">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Yangi Mashina Qo'shish</h6>
+                            <form action="{% url 'car_add' %}" method="post" id="signupForm">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Mashina Raqami</label>
+                                            <input class="form-control" data-inputmask-alias="99-*99*aa" data-inputmask="'casing':'upper', 'autoUnmask': true, 'removeMaskOnSubmit': true" name="carNumber"
+                                                   type="text" placeholder="Car Numer" required="required">
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Model</label>
+                                            <div id="the-basics">
+                                                <input value="" name="model" required="required" class="typeahead" type="text" placeholder="Model Name">
+                                            </div>
+                                        </div>
+                                    </div><!-- Col -->
+                                </div><!-- Row -->
+                                {% for message in messages %}
+                                    {% if message.extra_tags == 'car_create' %}
+                                        {{ message }}
+                                    {% endif %}
+                                {% endfor %}
+                                <button type="submit" class="btn btn-primary submit">Registratsiya</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Bonusni tekshirish</h6>
+                                <form action="{% url 'car_bonus_details' %}" method="post" id="signupForm">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label class="control-label">Mashina Raqami</label>
+                                                <input class="form-control" data-inputmask-alias="99-*99*aa" data-inputmask="'casing':'upper', 'autoUnmask': true, 'removeMaskOnSubmit': true" name="carNumber"
+                                                       type="text" placeholder="Car Numer" required="required">
+                                            </div>
+                                        </div><!-- Col -->
+                                    </div><!-- Row -->
+                                    {% for message in messages %}
+                                        {% if message.extra_tags == 'bonus_details' %}
+                                            {{ message }}
+                                        {% endif %}
+                                    {% endfor %}
+                                    <button type="submit" class="btn btn-primary submit">Tekshirish</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        {% endif %}
+
         {% if user.is_manager or user.is_petrol_staff %}
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">

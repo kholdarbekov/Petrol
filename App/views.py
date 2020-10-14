@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.detail import DetailView
 from django.conf import settings
 from django.forms.utils import ErrorList
 
@@ -476,12 +477,12 @@ class CarCreateView(CreateView):
         if self.request.session.get('car_create_count', 1) > settings.PETROL_DAILY_CAR_CREATE_LIMIT:
             car_create_limit_error = ErrorList()
             car_create_limit_error.data.append('1 kunda maximum %d ta mashina registratsiya qila olasiz' % settings.PETROL_DAILY_CAR_CREATE_LIMIT)
-            messages.error(self.request, car_create_limit_error)
+            messages.error(self.request, car_create_limit_error, 'car_create')
             return redirect(self.success_url)
         else:
             success_message = SuccessList()
             success_message.data.append(form.instance.carNumber + ' Registratsiyadan o\'tkazildi')
-            messages.success(self.request, success_message)
+            messages.success(self.request, success_message, 'car_create')
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -560,6 +561,51 @@ class CarBonusUpdateView(UpdateView):
 
     def form_invalid(self, form):
         return super().form_invalid(form)
+
+
+class CarBonusDetail(DetailView):
+    model = Car
+    context_object_name = 'car'
+    template_name = 'carsList.html'
+    success_url = reverse_lazy('cars_list')
+
+    def post(self, request, *args, **kwargs):
+        if self.request.session.get('car_bonus_check_count', False):
+            self.request.session['car_bonus_check_count'] += 1
+        else:
+            self.request.session['car_bonus_check_count'] = 1
+            self.request.session.set_expiry(86400)  # 1 day
+
+        if self.request.session.get('car_bonus_check_count', 1) > settings.PETROL_DAILY_CAR_BONUS_CHECK_LIMIT:
+            car_create_limit_error = ErrorList()
+            car_create_limit_error.data.append('1 kunda maximum %d marta avtomobil bonusini tekshira olasiz' % settings.PETROL_DAILY_CAR_BONUS_CHECK_LIMIT)
+            messages.error(self.request, car_create_limit_error, 'bonus_details')
+        else:
+            self.object = self.get_object()
+            if self.object:
+                success_message = SuccessList()
+                success_message.data.append(
+                    '{car} avtomobili {litre_after_bonus} L benzin sotib olgan'.format(car=self.object,
+                                                                                       litre_after_bonus=self.object.total_litres_after_bonus))
+                messages.success(self.request, success_message, 'bonus_details')
+            else:
+                car_create_limit_error = ErrorList()
+                car_create_limit_error.data.append('Siz kiritgan avtomobil topilmadi')
+                messages.error(self.request, car_create_limit_error, 'bonus_details')
+
+        return redirect(self.success_url)
+
+    def get_object(self, queryset=None):
+        try:
+            carNum = self.request.POST['carNumber']
+            if carNum and type(carNum) == str:
+                carNum = carNum.replace('-', '').upper()
+            else:
+                carNum = ''
+            obj = Car.objects.get(carNumber=carNum)
+        except ObjectDoesNotExist:
+            obj = None
+        return obj
 
 
 class TradesListView(ConfiguredListView):

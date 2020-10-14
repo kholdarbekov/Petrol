@@ -7,6 +7,7 @@ from django.conf import settings
 class Config(models.Model):
     petrol_bonus_limit = models.PositiveSmallIntegerField(default=500)
     daily_car_create_limit = models.PositiveIntegerField(default=3)
+    daily_car_bonus_check_limit = models.PositiveIntegerField(default=3)
 
     def __str__(self):
         return 'petrol bonus limit: %d, daily car create limit: %d' % (self.petrol_bonus_limit, self.daily_car_create_limit)
@@ -20,6 +21,7 @@ class Config(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         settings.PETROL_BONUS_LIMIT = self.petrol_bonus_limit
         settings.PETROL_DAILY_CAR_CREATE_LIMIT = self.daily_car_create_limit
+        settings.PETROL_DAILY_CAR_BONUS_CHECK_LIMIT = self.daily_car_bonus_check_limit
         return super(Config, self).save(force_insert, force_update, using, update_fields)
 
 
