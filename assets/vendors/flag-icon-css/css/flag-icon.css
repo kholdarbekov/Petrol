@@ -1,0 +1,40 @@
+.flag-icon-background {
+	background-size: contain;
+	background-position: 50%;
+	background-repeat: no-repeat
+}
+
+.flag-icon {
+	background-size: contain;
+	background-position: 50%;
+	background-repeat: no-repeat;
+	position: relative;
+	display: inline-block;
+	width: 1.33333333em;
+	line-height: 1em
+}
+
+.flag-icon:before {
+	content: '\00a0'
+}
+
+.flag-icon.flag-icon-squared {
+	width: 1em
+}
+
+.flag-icon-us {
+	/*https://www.nobleui.com/html/template/assets/vendors/flag-icon-css/flags/4x3/us.svg*/
+	background-image: url(https://www.nobleui.com/html/template/assets/vendors/flag-icon-css/flags/4x3/us.svg)
+}
+
+.flag-icon-ru {
+	background-image: url(https://www.nobleui.com/html/template/assets/vendors/flag-icon-css/flags/4x3/ru.svg)
+}
+
+.flag-icon-uz {
+	background-image: url(https://www.nobleui.com/html/template/assets/vendors/flag-icon-css/flags/4x3/uz.svg)
+}
+
+.flag-icon-kz {
+	background-image: url(https://www.nobleui.com/html/template/assets/vendors/flag-icon-css/flags/4x3/kz.svg)
+}

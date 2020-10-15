@@ -8,6 +8,24 @@
     <title>Petrol | {% block title %}{% endblock %}</title>
 
     {% block css_block %}{% endblock %}
+    <style>
+        .flag-icon-us {
+            /*https://www.nobleui.com/html/template/assets/vendors/flag-icon-css/flags/4x3/us.svg*/
+            background-image: url({% static 'vendors/flag-icon-css/flags/4x3/us.svg' %})
+        }
+
+        .flag-icon-ru {
+            background-image: url({% static 'vendors/flag-icon-css/flags/4x3/ru.svg' %})
+        }
+
+        .flag-icon-uz {
+            background-image: url({% static 'vendors/flag-icon-css/flags/4x3/uz.svg' %})
+        }
+
+        .flag-icon-kz {
+            background-image: url({% static 'vendors/flag-icon-css/flags/4x3/kz.svg' %})
+        }
+    </style>
 
     <link rel="shortcut icon" href="{% static "images/favicon.png" %}"/>
 </head>
@@ -218,18 +236,15 @@
                             <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-us"
                                                                                 title="us" id="us"></i> <span
                                     class="ml-1"> English </span></a>
-                            <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-fr"
-                                                                                title="fr" id="fr"></i> <span
-                                    class="ml-1"> French </span></a>
-                            <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-de"
-                                                                                title="de" id="de"></i> <span
-                                    class="ml-1"> German </span></a>
-                            <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-pt"
-                                                                                title="pt" id="pt"></i> <span
-                                    class="ml-1"> Portuguese </span></a>
-                            <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-es"
-                                                                                title="es" id="es"></i> <span
-                                    class="ml-1"> Spanish </span></a>
+                            <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-ru"
+                                                                                title="ru" id="ru"></i> <span
+                                    class="ml-1"> Русский </span></a>
+                            <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-uz"
+                                                                                title="uz" id="uz"></i> <span
+                                    class="ml-1"> O'zbek tili </span></a>
+                            <a href="javascript:" class="dropdown-item py-2"><i class="flag-icon flag-icon-kz"
+                                                                                title="kz" id="kz"></i> <span
+                                    class="ml-1"> Қазақ тілі </span></a>
                         </div>
                     </li>
                     <li class="nav-item dropdown nav-apps">
