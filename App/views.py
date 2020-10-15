@@ -469,7 +469,8 @@ class CarCreateView(CreateView):
         form.instance.created_by = self.member
 
         if self.request.session.get('car_create_count', False):
-            self.request.session['car_create_count'] += 1
+            if self.request.session.get('car_create_count') <= settings.PETROL_DAILY_CAR_CREATE_LIMIT:
+                self.request.session['car_create_count'] += 1
         else:
             self.request.session['car_create_count'] = 1
             self.request.session.set_expiry(86400)  # 1 day
@@ -571,7 +572,8 @@ class CarBonusDetail(DetailView):
 
     def post(self, request, *args, **kwargs):
         if self.request.session.get('car_bonus_check_count', False):
-            self.request.session['car_bonus_check_count'] += 1
+            if self.request.session.get('car_bonus_check_count', 1) <= settings.PETROL_DAILY_CAR_BONUS_CHECK_LIMIT:
+                self.request.session['car_bonus_check_count'] += 1
         else:
             self.request.session['car_bonus_check_count'] = 1
             self.request.session.set_expiry(86400)  # 1 day
